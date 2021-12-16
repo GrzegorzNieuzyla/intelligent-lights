@@ -69,22 +69,23 @@ for line in filter(None, _grid.strip().split('\n')):
     SAMPLE_GRID.append(line2)
 
 
-SAMPLE_LIGHTS = [
-    Light(22, 4),
-    Light(22, 12),
-    Light(70, 4),
-    Light(22, 12),
-    Light(20, 26),
-    Light(70, 26),
-    Light(47, 40),
-    Light(18, 40),
-    Light(77, 40),
-]
+SAMPLE_LIGHTS = {
+    Light(22, 4, 50),
+    Light(22, 12, 42),
+    Light(70, 4, 22),
+    Light(22, 12, 73),
+    Light(20, 26, 0),
+    Light(70, 26, 100),
+    Light(47, 40, 23),
+    Light(18, 40, 22),
+    Light(77, 40, 22),
+}
 
-SAMPLE_PERSONS = [
+SAMPLE_PERSONS = {
+    (1, 1),
     (20, 20),
     (70, 20),
     (22, 40),
     (50, 30),
     (90, 40),
-]
+}
