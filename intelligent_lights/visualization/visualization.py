@@ -35,7 +35,7 @@ class Visualization:
 
     @staticmethod
     def get_light_value(value) -> Tuple[int, int, int]:
-        val = 10 + value * 2.5
+        val = 5 + value * 2.5
         return val, val, 0
 
     def draw_text(self, text, x, y):
