@@ -3,6 +3,7 @@ from typing import Tuple, List
 import pygame
 
 from intelligent_lights.cells.cell_type import CellType
+from intelligent_lights.core.illuminance_calculator import IlluminanceCalculator
 from intelligent_lights.display import Display
 from intelligent_lights.visualization.visualization_context import VisualizationContext
 
@@ -34,8 +35,8 @@ class Visualization:
         return x * self.cell_width, y * self.cell_height
 
     @staticmethod
-    def get_light_value(value) -> Tuple[int, int, int]:
-        val = 5 + value * 2.5
+    def get_light_value(x, y, context: VisualizationContext) -> Tuple[int, int, int]:
+        val = min(IlluminanceCalculator.calculate(x, y, context), 255)
         return val, val, 0
 
     def draw_text(self, text, x, y):
@@ -55,7 +56,7 @@ class Visualization:
             if cell.cell_type == CellType.Wall:
                 color = WALL_COLOR
             elif cell.cell_type == CellType.Empty:
-                color = self.get_light_value(cell.light_level)
+                color = self.get_light_value(grid_x, grid_y, context)
             elif cell.cell_type == CellType.Device:
                 color = DEVICE_COLOR
             if (grid_x, grid_y) in context.light_positions:
