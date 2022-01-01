@@ -27,6 +27,7 @@ class VisualizationManager:
         self.context: Optional[VisualizationContext] = None
         self.context_modified: bool = True
         self.draw_mutex: Lock = Lock()
+        self.running = True
         self.draw_thread.start()
 
     def redraw(self, context: VisualizationContext) -> None:
@@ -35,12 +36,11 @@ class VisualizationManager:
             self.context_modified = True
 
     def _draw_thread(self) -> None:
-        running = True
         clock = Clock()
-        while running:
+        while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    self.running = False
                 if event.type == pygame.MOUSEBUTTONUP:
                     x, y = pygame.mouse.get_pos()
                     print("Pressed:", x // self.cell_width, y // self.cell_height)
