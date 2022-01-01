@@ -5,7 +5,7 @@ from intelligent_lights.visualization.visualization_context import Visualization
 
 
 class IlluminanceCalculator:
-    power_multiplier = 8e4
+    power_multiplier = 35e3
 
     def __init__(self):
         pass
@@ -15,7 +15,7 @@ class IlluminanceCalculator:
     '''
     @staticmethod
     def calculate(x: int, y: int, context: VisualizationContext):
-        h = 200
+        # h = 200
         cell_size = 20
         E = 0
         for x_light, y_light in context.light_positions:
@@ -23,11 +23,14 @@ class IlluminanceCalculator:
                 continue
             dx = (x - x_light) * cell_size
             dy = (y - y_light) * cell_size
-            d = sqrt(dx ** 2 + dy ** 2)
-            r = sqrt(d ** 2 + h ** 2)
+            # d = sqrt(dx ** 2 + dy ** 2)
+            # r = sqrt(d ** 2 + h ** 2)
+            r = sqrt(dx ** 2 + dy ** 2)
+            if r == 0:
+                continue
             I = context.light_positions[(x_light, y_light)].light_level * IlluminanceCalculator.power_multiplier
-            cos_alfa = h / r
-            E += I * cos_alfa / r ** 2
+            # cos_alfa = h / r
+            E += I / r ** 2
 
         return round(E)
 
