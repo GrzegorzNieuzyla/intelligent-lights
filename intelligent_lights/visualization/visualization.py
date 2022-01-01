@@ -14,6 +14,12 @@ EMPTY_COLOR = (255, 255, 0)
 DEVICE_COLOR = (176, 0, 176)
 LIGHT_COLOR = (255, 255, 255)
 TEXT_COLOR = (255, 0, 0)
+CAMERA_COLOR = (128, 128, 128)
+SENSOR_COLOR = (255, 128, 0)
+SECTOR_COLOR = (255, 0, 0)
+EXIT_COLOR = (0, 255, 0)
+ROOM_COLOR = (176, 0, 176)
+WINDOW_COLOR = (0, 0, 255)
 
 
 class Visualization:
@@ -39,8 +45,8 @@ class Visualization:
         val = min(IlluminanceCalculator.calculate(x, y, context), 255)
         return val, val, 0
 
-    def draw_text(self, text, x, y):
-        surface = self.font.render(text, False, TEXT_COLOR)
+    def draw_text(self, text, x, y, color=TEXT_COLOR):
+        surface = self.font.render(text, False, color)
         rect = surface.get_rect(center=(x, y))
         self.screen.blit(surface, rect)
 
@@ -65,9 +71,45 @@ class Visualization:
             if (grid_x, grid_y) in context.person_positions:
                 pygame.draw.circle(self.screen, PERSON_COLOR, self.get_center(x, y),
                                    min(self.cell_width, self.cell_height) // 2)
+            if (grid_x, grid_y) in context.camera_positions:
+                pygame.draw.circle(self.screen, CAMERA_COLOR, self.get_center(x, y),
+                                   min(self.cell_width, self.cell_height) // 2)
+            if (grid_x, grid_y) in context.sensor_positions:
+                pygame.draw.circle(self.screen, SENSOR_COLOR, self.get_center(x, y),
+                                   min(self.cell_width, self.cell_height) // 2)
 
         for grid_x, grid_y in context.light_positions:
             self.draw_text(str(int(context.light_positions[(grid_x, grid_y)].light_level)),
                            *self.get_center(*self.get_screen_position(grid_x, grid_y)))
+
+        for sector in context.sectors:
+            x, y, w, h = sector.bounds
+            x, y = self.get_screen_position(x, y)
+            w *= self.cell_width
+            h *= self.cell_height
+            pygame.draw.rect(self.screen, SECTOR_COLOR, pygame.Rect(x, y, w, h), width=2)
+
+        for ex in context.exits:
+            x, y, w, h = ex.bounds
+            x, y = self.get_screen_position(x, y)
+            w *= self.cell_width
+            h *= self.cell_height
+            pygame.draw.rect(self.screen, EXIT_COLOR, pygame.Rect(x, y, w, h), width=2)
+
+        for w in context.windows:
+            x, y, w, h = w.bounds
+            x, y = self.get_screen_position(x, y)
+            w *= self.cell_width
+            h *= self.cell_height
+            pygame.draw.rect(self.screen, WINDOW_COLOR, pygame.Rect(x, y, w, h))
+
+        for room in context.rooms:
+            for rect in room.rects:
+                x, y, w, h = rect
+                x, y = self.get_screen_position(x, y)
+                w *= self.cell_width
+                h *= self.cell_height
+                pygame.draw.rect(self.screen, ROOM_COLOR, pygame.Rect(x, y, w, h), width=2)
+                self.draw_text(room.label, x + w // 2, y + h // 2, ROOM_COLOR)
 
         pygame.display.flip()

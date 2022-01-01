@@ -5,7 +5,7 @@ from intelligent_lights.visualization.visualization_context import Visualization
 
 
 class IlluminanceCalculator:
-    power_multiplier = 35e3
+    power_multiplier = 5
 
     def __init__(self):
         pass
@@ -16,7 +16,7 @@ class IlluminanceCalculator:
     @staticmethod
     def calculate(x: int, y: int, context: VisualizationContext):
         # h = 200
-        cell_size = 20
+        cell_size = context.cell_size_in_meter
         E = 0
         for x_light, y_light in context.light_positions:
             if IlluminanceCalculator.is_wall_in_straight_line(x, y, x_light, y_light, context):
