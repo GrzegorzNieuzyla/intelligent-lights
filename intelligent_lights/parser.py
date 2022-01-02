@@ -24,6 +24,9 @@ class Parser:
         self.cell_sizes = {}
         self.exits = {}
         self.windows = {}
+        self.sun_power = {}
+        self.sun_position = {}
+        self.sun_distance = {}
         for floor in data["floors"]:
             label = floor['label']
             self.lights[label] = {Light(light[0], light[1]) for light in floor['lights']}
@@ -32,6 +35,9 @@ class Parser:
             self.cameras[label] = {(camera[0], camera[1]) for camera in floor['cameras']}
             self.exits[label] = {Exit(ex) for ex in floor['exits']}
             self.windows[label] = {Window(w) for w in floor['windows']}
+            self.sun_power[label] = floor['sun_power']
+            self.sun_position[label] = floor['sun_position']
+            self.sun_distance[label] = floor['sun_distance']
 
             width, height = floor['width'], floor['height']
             self.cell_sizes[label] = floor['cell_size']

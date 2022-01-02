@@ -8,7 +8,7 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 
 
 class SimulationManager:
-    def __init__(self, vis_manager, grid, lights, sensors, cameras, rooms, sectors, cell_size, exits, windows, persons):
+    def __init__(self, vis_manager, grid, lights, sensors, cameras, rooms, sectors, cell_size, exits, windows, persons, sun_power, sun_position, sun_distance):
         self.persons = persons
         self.windows = windows
         self.exits = exits
@@ -18,6 +18,9 @@ class SimulationManager:
         self.cameras = cameras
         self.sensors = sensors
         self.lights = lights
+        self.sun_power = sun_power
+        self.sun_position = sun_position
+        self.sun_distance = sun_distance
         self.grid = grid
         self.visualization_manager: VisualizationManager = vis_manager
         self.lights_adjuster = LightsAdjuster()
@@ -30,7 +33,7 @@ class SimulationManager:
 
             ctx = VisualizationContext(self.grid, self.persons, self.lights, set(self.sensors), set(self.cameras),
                                        self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
-                                       self.get_time())
+                                       self.get_time(), self.sun_power, self.sun_position, self.sun_distance)
             self.update_lights(ctx)
             self.visualization_manager.redraw(ctx)
             sleep(0.1)

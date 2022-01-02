@@ -22,3 +22,6 @@ class VisualizationContext:
     windows: List[Window]
     cell_size_in_meter: float
     time: str
+    sun_power: int
+    sun_position: List[int]
+    sun_distance: int
