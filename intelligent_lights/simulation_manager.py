@@ -9,7 +9,6 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 
 class SimulationManager:
     def __init__(self, vis_manager, grid, lights, sensors, cameras, rooms, sectors, cell_size, exits, windows, persons, sun_power, sun_position, sun_distance):
-        self.persons = persons
         self.windows = windows
         self.exits = exits
         self.cell_size = cell_size
@@ -24,7 +23,7 @@ class SimulationManager:
         self.grid = grid
         self.visualization_manager: VisualizationManager = vis_manager
         self.lights_adjuster = LightsAdjuster()
-        self.person_simulator = PersonSimulator()
+        self.person_simulator = PersonSimulator(persons)
         self.illuminance_calc = IlluminanceCalculator()
 
     def run(self):
@@ -32,12 +31,12 @@ class SimulationManager:
         iteration_counter = 0
         while self.visualization_manager.running:
             t = time()
-            self.person_simulator.process()  # TODO
+            self.person_simulator.process(self.grid)
             self.lights_adjuster.process()  # TODO
 
-            ctx = VisualizationContext(self.grid, self.get_persons_localizations(), self.lights, set(self.sensors), set(self.cameras),
-                                       self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
-                                       self.get_time(), self.sun_power, self.sun_position, self.sun_distance)
+            ctx = VisualizationContext(self.grid, self.person_simulator.get_persons_localizations(), self.lights,
+                                       set(self.sensors), set(self.cameras), self.sectors, self.exits, self.rooms,
+                                       self.windows, self.cell_size, self.get_time(), self.sun_power, self.sun_position, self.sun_distance)
 
             if iteration_counter == 0:
                 self.update_lights(ctx)
@@ -48,15 +47,6 @@ class SimulationManager:
             t = time() - t
             if t < 0.03:
                 sleep(0.03 - t)
-
-    def get_persons_localizations(self):
-        localizations = {(0, 0)}
-        localizations.clear()
-        for person in self.persons:
-            localizations.add(person.position)
-            person.move(self.grid)
-
-        return localizations
 
     def get_time(self) -> str:
         return "22:22"  # TODO
