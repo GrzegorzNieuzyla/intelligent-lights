@@ -9,12 +9,12 @@ class Person:
     def __init__(self, grid, rooms):
         self.position = self.getRoom(rooms)
         self.localizations = [
-            Localization(self.getRoom(rooms), 50),
+            Localization(self.getRoom(rooms), 40),
             Localization(self.getRoom(rooms), 10),
             Localization(self.getKitchen(rooms), 5),
             Localization(self.getToilet(rooms), 3)
         ]
-        self.target = self.getTarget()
+        self.target = self.getTarget().position
         self.path = self.generatePath(grid)
 
     def getTarget(self):
@@ -28,7 +28,7 @@ class Person:
         for loc in self.localizations:
             rnd -= loc.severity
             if (rnd <= 0):
-                return loc.position
+                return loc
         return None
 
     def getRoom(self, rooms):
@@ -54,8 +54,11 @@ class Person:
             self.position = self.path[0]
             self.path = self.path[1:]
         else:
-            self.target = self.getTarget()
+            targetLoc = self.getTarget()
+            self.target = targetLoc.position
             self.path = self.generatePath(grid)
+            for i in range(targetLoc.severity):
+                self.path.append(self.target)
 
     def generatePath(self, grid):
         start = self.position
