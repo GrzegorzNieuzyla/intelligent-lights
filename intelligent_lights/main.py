@@ -1,4 +1,5 @@
 from random import randint
+from threading import Thread
 
 from intelligent_lights.parser import Parser
 from intelligent_lights.simulation_manager import SimulationManager
@@ -41,5 +42,6 @@ simulator = SimulationManager(visualization, SAMPLE_GRID, light_dict, SAMPLE_SEN
                               SAMPLE_SECTORS, CELL_SIZE, SAMPLE_EXITS, SAMPLE_WINDOWS, SAMPLE_PERSONS, SAMPLE_SUN_POWER,
                               SAMPLE_SUN_POSITION, SAMPLE_SUN_DISTANCE)
 
-
-simulator.run()
+sim_thread = Thread(target=simulator.run)
+sim_thread.start()
+visualization.start()

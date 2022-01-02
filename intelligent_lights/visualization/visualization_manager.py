@@ -28,7 +28,9 @@ class VisualizationManager:
         self.context_modified: bool = True
         self.draw_mutex: Lock = Lock()
         self.running = True
-        self.draw_thread.start()
+
+    def start(self):
+        self._draw_thread()
 
     def redraw(self, context: VisualizationContext) -> None:
         with self.draw_mutex:
