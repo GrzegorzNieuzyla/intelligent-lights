@@ -12,7 +12,8 @@ from intelligent_lights.light import Light
 @dataclass
 class VisualizationContext:
     grid: List[List[Cell]]
-    person_positions: Set[Tuple[int, int]]
+    person_visible_positions: Set[Tuple[int, int]]
+    person_not_visible_positions: Set[Tuple[int, int]]
     light_positions: Dict[Tuple[int, int], Light]
     sensor_positions: Set[Tuple[int, int]]
     camera_positions: Set[Tuple[int, int]]

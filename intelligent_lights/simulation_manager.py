@@ -31,12 +31,14 @@ class SimulationManager:
         iteration_counter = 0
         while self.visualization_manager.running:
             t = time()
-            self.person_simulator.process(self.grid)
+            self.person_simulator.process(self.grid, self.cameras)
             self.lights_adjuster.process()  # TODO
 
-            ctx = VisualizationContext(self.grid, self.person_simulator.get_persons_localizations(), self.lights,
+            persons_visible_positions, persons_not_visible_positions = self.person_simulator.get_persons_positions()
+            ctx = VisualizationContext(self.grid, persons_visible_positions, persons_not_visible_positions, self.lights,
                                        set(self.sensors), set(self.cameras), self.sectors, self.exits, self.rooms,
-                                       self.windows, self.cell_size, self.get_time(), self.sun_power, self.sun_position, self.sun_distance)
+                                       self.windows, self.cell_size, self.get_time(), self.sun_power, self.sun_position,
+                                       self.sun_distance)
 
             if iteration_counter == 0:
                 self.update_lights(ctx)

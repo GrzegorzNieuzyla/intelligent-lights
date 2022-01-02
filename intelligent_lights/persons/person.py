@@ -1,5 +1,6 @@
 import collections
 from random import randint
+from bresenham import bresenham
 
 from intelligent_lights.cells.cell_type import CellType
 from intelligent_lights.persons.localization import Localization
@@ -16,6 +17,7 @@ class Person:
         ]
         self.target = self.getTarget().position
         self.path = self.generatePath(grid)
+        self.visible = False
 
     def getTarget(self):
         count = 0
@@ -59,6 +61,21 @@ class Person:
             self.path = self.generatePath(grid)
             for i in range(targetLoc.severity):
                 self.path.append(self.target)
+
+    def update_camera_visibility(self, grid, cameras):
+        self.visible = self.check_camera_visibility(grid, cameras)
+
+    def check_camera_visibility(self, grid, cameras):
+        for camera_x, camera_y in cameras:
+            visible = True
+            for check_x, check_y in list(bresenham(self.position[0], self.position[1], camera_x, camera_y)):
+                if grid[check_y][check_x].cell_type == CellType.Wall:
+                    visible = False
+                    break
+
+            if visible:
+                return True
+        return False
 
     def generatePath(self, grid):
         start = self.position
