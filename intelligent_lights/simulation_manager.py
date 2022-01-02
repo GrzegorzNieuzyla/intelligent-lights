@@ -1,4 +1,4 @@
-from time import sleep
+from time import sleep, time
 
 from intelligent_lights.core.illuminance_calculator import IlluminanceCalculator
 from intelligent_lights.lights_adjuster import LightsAdjuster
@@ -25,9 +25,12 @@ class SimulationManager:
         self.visualization_manager: VisualizationManager = vis_manager
         self.lights_adjuster = LightsAdjuster()
         self.person_simulator = PersonSimulator()
+        self.illuminance_calc = IlluminanceCalculator()
 
     def run(self):
+        sleep(0.5)
         while self.visualization_manager.running:
+            t = time()
             self.person_simulator.process()  # TODO
             self.lights_adjuster.process()  # TODO
 
@@ -36,10 +39,12 @@ class SimulationManager:
                                        self.get_time(), self.sun_power, self.sun_position, self.sun_distance)
             self.update_lights(ctx)
             self.visualization_manager.redraw(ctx)
-            sleep(0.1)
+            t = time() - t
+            if t < 0.1:
+                sleep(0.1 - t)
 
     def getPersonsLocalizations(self):
-        localizations = {(0,0)}
+        localizations = {(0, 0)}
         localizations.clear()
         for person in self.persons:
             localizations.add(person.position)
@@ -50,8 +55,7 @@ class SimulationManager:
     def get_time(self) -> str:
         return "22:22"  # TODO
 
-    @staticmethod
-    def update_lights(context):
+    def update_lights(self, context):
         for x in range(len(context.grid[0])):
             for y in range(len(context.grid)):
-                context.grid[y][x].light_level = min(IlluminanceCalculator.calculate(x, y, context), 255)
+                context.grid[y][x].light_level = min(self.illuminance_calc.calculate(x, y, context), 255)
