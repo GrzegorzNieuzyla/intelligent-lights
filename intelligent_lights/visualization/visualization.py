@@ -20,6 +20,7 @@ SECTOR_COLOR = (255, 0, 0)
 EXIT_COLOR = (0, 255, 0)
 ROOM_COLOR = (176, 0, 176)
 WINDOW_COLOR = (0, 0, 255)
+DETECTION_POINT = (0, 128, 0)
 
 
 class Visualization:
@@ -76,6 +77,9 @@ class Visualization:
                                    min(self.cell_width, self.cell_height) // 2)
             if (grid_x, grid_y) in context.sensor_positions:
                 pygame.draw.circle(self.screen, SENSOR_COLOR, self.get_center(x, y),
+                                   min(self.cell_width, self.cell_height) // 2)
+            if (grid_x, grid_y) in context.detection_points:
+                pygame.draw.circle(self.screen, DETECTION_POINT, self.get_center(x, y),
                                    min(self.cell_width, self.cell_height) // 2)
 
         for grid_x, grid_y in context.light_positions:

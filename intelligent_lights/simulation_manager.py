@@ -1,4 +1,5 @@
 from time import sleep, time
+import random
 
 from intelligent_lights.core.illuminance_calculator import IlluminanceCalculator
 from intelligent_lights.lights_adjuster import LightsAdjuster
@@ -8,7 +9,8 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 
 
 class SimulationManager:
-    def __init__(self, vis_manager, grid, lights, sensors, cameras, rooms, sectors, cell_size, exits, windows, persons, sun_power, sun_position, sun_distance):
+    def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, sectors, cell_size, exits, windows,
+                 persons, sun_power, sun_position, sun_distance, detection_points):
         self.persons = persons
         self.windows = windows
         self.exits = exits
@@ -17,10 +19,12 @@ class SimulationManager:
         self.rooms = rooms
         self.cameras = cameras
         self.sensors = sensors
-        self.lights = lights
+        self.light_dict = light_dict
+        self.lights = list(self.light_dict.values())
         self.sun_power = sun_power
         self.sun_position = sun_position
         self.sun_distance = sun_distance
+        self.detection_points = detection_points
         self.grid = grid
         self.visualization_manager: VisualizationManager = vis_manager
         self.lights_adjuster = LightsAdjuster()
@@ -29,22 +33,29 @@ class SimulationManager:
 
     def run(self):
         sleep(0.5)
+        self.draw()
         while self.visualization_manager.running:
             t = time()
             self.person_simulator.process()  # TODO
-            self.lights_adjuster.process()  # TODO
+            should_light = {d: random.random() > -0.5 for d in self.detection_points}
+            sensors = set((x, y, self.grid[y][x].light_level) for x, y in self.sensors)
+            self.lights_adjuster.process(sensors, self.lights, self.sectors, self.rooms, should_light)  # TODO
 
-            ctx = VisualizationContext(self.grid, self.persons, self.lights, set(self.sensors), set(self.cameras),
-                                       self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
-                                       self.get_time(), self.sun_power, self.sun_position, self.sun_distance)
-            self.update_lights(ctx)
-            self.visualization_manager.redraw(ctx)
+            self.draw()
             t = time() - t
             if t < 0.1:
                 sleep(0.1 - t)
 
     def get_time(self) -> str:
         return "22:22"  # TODO
+
+    def draw(self):
+        ctx = VisualizationContext(self.grid, self.persons, self.light_dict, set(self.sensors), set(self.cameras),
+                                   self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
+                                   self.get_time(), self.sun_power, self.sun_position, self.sun_distance,
+                                   set(self.detection_points))
+        self.update_lights(ctx)
+        self.visualization_manager.redraw(ctx)
 
     def update_lights(self, context):
         for x in range(len(context.grid[0])):
