@@ -9,7 +9,8 @@ from intelligent_lights.visualization.visualization_context import Visualization
 
 BACKGROUND_COLOR = (255, 255, 255)
 WALL_COLOR = (0, 0, 96)
-PERSON_COLOR = (255, 0, 0)
+PERSON_BLUE_COLOR = (0, 0, 255)
+PERSON_RED_COLOR = (255, 0, 0)
 EMPTY_COLOR = (255, 255, 0)
 DEVICE_COLOR = (176, 0, 176)
 LIGHT_COLOR = (255, 255, 255)
@@ -69,8 +70,11 @@ class Visualization:
             if (grid_x, grid_y) in context.light_positions:
                 color = LIGHT_COLOR
             pygame.draw.rect(self.screen, color, pygame.Rect(x, y, self.cell_width, self.cell_height))
-            if (grid_x, grid_y) in context.person_positions:
-                pygame.draw.circle(self.screen, PERSON_COLOR, self.get_center(x, y),
+            if (grid_x, grid_y) in context.person_visible_positions:
+                pygame.draw.circle(self.screen, PERSON_BLUE_COLOR, self.get_center(x, y),
+                                   min(self.cell_width, self.cell_height) // 2)
+            if (grid_x, grid_y) in context.person_not_visible_positions:
+                pygame.draw.circle(self.screen, PERSON_RED_COLOR, self.get_center(x, y),
                                    min(self.cell_width, self.cell_height) // 2)
             if (grid_x, grid_y) in context.camera_positions:
                 pygame.draw.circle(self.screen, CAMERA_COLOR, self.get_center(x, y),

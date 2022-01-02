@@ -11,7 +11,6 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 class SimulationManager:
     def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, sectors, cell_size, exits, windows,
                  persons, sun_power, sun_position, sun_distance, detection_points):
-        self.persons = persons
         self.windows = windows
         self.exits = exits
         self.cell_size = cell_size
@@ -24,11 +23,11 @@ class SimulationManager:
         self.sun_power = sun_power
         self.sun_position = sun_position
         self.sun_distance = sun_distance
-        self.detection_points = detection_points
         self.grid = grid
+        self.detection_points = detection_points
         self.visualization_manager: VisualizationManager = vis_manager
         self.lights_adjuster = LightsAdjuster()
-        self.person_simulator = PersonSimulator()
+        self.person_simulator = PersonSimulator(persons)
         self.illuminance_calc = IlluminanceCalculator()
 
     def run(self):
@@ -36,7 +35,7 @@ class SimulationManager:
         self.draw()
         while self.visualization_manager.running:
             t = time()
-            self.person_simulator.process()  # TODO
+            self.person_simulator.process(self.grid, self.cameras)
             should_light = {d: random.random() > -0.5 for d in self.detection_points}
             sensors = set((x, y, self.grid[y][x].light_level) for x, y in self.sensors)
             self.lights_adjuster.process(sensors, self.lights, self.sectors, self.rooms, should_light)  # TODO
@@ -50,10 +49,11 @@ class SimulationManager:
         return "22:22"  # TODO
 
     def draw(self):
-        ctx = VisualizationContext(self.grid, self.persons, self.light_dict, set(self.sensors), set(self.cameras),
-                                   self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
-                                   self.get_time(), self.sun_power, self.sun_position, self.sun_distance,
-                                   set(self.detection_points))
+        persons_visible_positions, persons_not_visible_positions = self.person_simulator.get_persons_positions()
+        ctx = VisualizationContext(self.grid, persons_visible_positions, persons_not_visible_positions, self.light_dict,
+                                   set(self.sensors), set(self.cameras), self.sectors, self.exits, self.rooms,
+                                   self.windows, self.cell_size, self.get_time(), self.sun_power, self.sun_position,
+                                   self.sun_distance, set(self.detection_points))
         self.update_lights(ctx)
         self.visualization_manager.redraw(ctx)
 

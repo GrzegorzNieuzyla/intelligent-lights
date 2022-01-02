@@ -1,6 +1,7 @@
 from random import randint
 from threading import Thread
 
+from intelligent_lights.persons.person import Person
 from intelligent_lights.parser import Parser
 from intelligent_lights.simulation_manager import SimulationManager
 from intelligent_lights.visualization.visualization_manager import VisualizationManager
@@ -21,15 +22,18 @@ SAMPLE_SUN_POWER = parser.sun_power["Floor 1"]
 SAMPLE_SUN_POSITION = parser.sun_position["Floor 1"]
 SAMPLE_SUN_DISTANCE = parser.sun_distance["Floor 1"]
 SAMPLE_DETECTION_POINTS = parser.detection_points["Floor 1"]
-
-SAMPLE_PERSONS = {
-    (1, 1),
-    (20, 20),
-    (70, 20),
-    (22, 40),
-    (50, 30),
-    (90, 40),
-}
+SAMPLE_PERSONS = [
+    Person(SAMPLE_GRID, SAMPLE_ROOMS),
+    Person(SAMPLE_GRID, SAMPLE_ROOMS),
+    Person(SAMPLE_GRID, SAMPLE_ROOMS),
+    Person(SAMPLE_GRID, SAMPLE_ROOMS),
+    Person(SAMPLE_GRID, SAMPLE_ROOMS),
+    Person(SAMPLE_GRID, SAMPLE_ROOMS),
+    Person(SAMPLE_GRID, SAMPLE_ROOMS),
+    Person(SAMPLE_GRID, SAMPLE_ROOMS),
+    Person(SAMPLE_GRID, SAMPLE_ROOMS),
+    Person(SAMPLE_GRID, SAMPLE_ROOMS)
+]
 
 visualization = VisualizationManager(1600, 900, len(SAMPLE_GRID[0]), len(SAMPLE_GRID), force_redraw=True)
 
