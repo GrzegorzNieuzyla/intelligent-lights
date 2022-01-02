@@ -9,7 +9,8 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 
 
 class SimulationManager:
-    def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, sectors, cell_size, exits, windows, persons, sun_power, sun_position, sun_distance):
+    def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, sectors, cell_size, exits, windows,
+                 persons, sun_power, sun_position, sun_distance, detection_points):
         self.persons = persons
         self.windows = windows
         self.exits = exits
@@ -23,6 +24,7 @@ class SimulationManager:
         self.sun_power = sun_power
         self.sun_position = sun_position
         self.sun_distance = sun_distance
+        self.detection_points = detection_points
         self.grid = grid
         self.visualization_manager: VisualizationManager = vis_manager
         self.lights_adjuster = LightsAdjuster()
@@ -34,12 +36,14 @@ class SimulationManager:
         while self.visualization_manager.running:
             t = time()
             self.person_simulator.process()  # TODO
-            should_light = {l: random.random() > 0.1 for l in self.sensors}
-            self.lights_adjuster.process(self.sensors, self.lights, self.sectors, self.rooms, should_light)  # TODO
+            should_light = {l: random.random() > 0.5 for l in self.sensors}
+            detected = {(d[0], d[1]): random.random() > 0.5 for d in self.detection_points}
+            self.lights_adjuster.process(self.sensors, self.lights, self.sectors, self.rooms, should_light, detected)  # TODO
 
             ctx = VisualizationContext(self.grid, self.persons, self.light_dict, set(self.sensors), set(self.cameras),
                                        self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
-                                       self.get_time(), self.sun_power, self.sun_position, self.sun_distance)
+                                       self.get_time(), self.sun_power, self.sun_position, self.sun_distance,
+                                       self.detection_points)
             self.update_lights(ctx)
             self.visualization_manager.redraw(ctx)
             t = time() - t

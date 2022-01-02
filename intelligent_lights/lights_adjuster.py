@@ -10,7 +10,7 @@ class LightsAdjuster:
         pass
 
     def process(self, sensors: Set[Tuple[int, int]], lights: List[Light], sectors: List[Sector], rooms: List[Room],
-                should_light: Dict[Tuple[int, int], bool]):
+                should_light: Dict[Tuple[int, int], bool], detected: Dict[Tuple[int, int], bool]):
 
         for sensor, _ in filter(lambda x: not x[1], should_light.items()):
             sector = self._find_sector_for_cell(*sensor, sectors)
@@ -19,6 +19,10 @@ class LightsAdjuster:
                 for light in should_off:
                     light.light_level = 0
 
+        for detected_p in filter(lambda x: not x[1], detected.items()):
+            room = self._find_room_for_cell
+            
+
 
 
     @staticmethod
@@ -26,5 +30,13 @@ class LightsAdjuster:
         for sector in sectors:
             if sector.is_cell_in(x, y):
                 return sector
+
+        return None
+
+    @staticmethod
+    def _find_room_for_cell(x, y, rooms: List[Room]):
+        for room in rooms:
+            if room.is_cell_in(x, y):
+                return room
 
         return None

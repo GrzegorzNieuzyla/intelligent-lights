@@ -20,6 +20,7 @@ SAMPLE_WINDOWS = parser.windows["Floor 1"]
 SAMPLE_SUN_POWER = parser.sun_power["Floor 1"]
 SAMPLE_SUN_POSITION = parser.sun_position["Floor 1"]
 SAMPLE_SUN_DISTANCE = parser.sun_distance["Floor 1"]
+SAMPLE_DETECTION_POINTS = parser.detection_points["Floor 1"]
 
 SAMPLE_PERSONS = {
     (1, 1),
@@ -40,7 +41,7 @@ light_dict = {(light.x, light.y): light for light in SAMPLE_LIGHTS}
 
 simulator = SimulationManager(visualization, SAMPLE_GRID, light_dict, SAMPLE_SENSORS, SAMPLE_CAMERAS, SAMPLE_ROOMS,
                               SAMPLE_SECTORS, CELL_SIZE, SAMPLE_EXITS, SAMPLE_WINDOWS, SAMPLE_PERSONS, SAMPLE_SUN_POWER,
-                              SAMPLE_SUN_POSITION, SAMPLE_SUN_DISTANCE)
+                              SAMPLE_SUN_POSITION, SAMPLE_SUN_DISTANCE, SAMPLE_DETECTION_POINTS)
 
 sim_thread = Thread(target=simulator.run)
 sim_thread.start()

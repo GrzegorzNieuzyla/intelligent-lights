@@ -27,6 +27,7 @@ class Parser:
         self.sun_power = {}
         self.sun_position = {}
         self.sun_distance = {}
+        self.detection_points = {}
         for floor in data["floors"]:
             label = floor['label']
             self.lights[label] = {Light(light[0], light[1]) for light in floor['lights']}
@@ -38,6 +39,7 @@ class Parser:
             self.sun_power[label] = floor['sun_power']
             self.sun_position[label] = floor['sun_position']
             self.sun_distance[label] = floor['sun_distance']
+            self.detection_points[label] = floor["detection_points"]
 
             width, height = floor['width'], floor['height']
             self.cell_sizes[label] = floor['cell_size']

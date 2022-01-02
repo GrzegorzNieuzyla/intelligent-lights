@@ -25,3 +25,4 @@ class VisualizationContext:
     sun_power: int
     sun_position: List[int]
     sun_distance: int
+    detection_points: Set[Tuple[int, int]]
