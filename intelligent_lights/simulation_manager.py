@@ -33,19 +33,15 @@ class SimulationManager:
 
     def run(self):
         sleep(0.5)
+        self.draw()
         while self.visualization_manager.running:
             t = time()
             self.person_simulator.process()  # TODO
-            should_light = {d: random.random() > 0.5 for d in self.detection_points}
+            should_light = {d: random.random() > -0.5 for d in self.detection_points}
             sensors = set((x, y, self.grid[y][x].light_level) for x, y in self.sensors)
             self.lights_adjuster.process(sensors, self.lights, self.sectors, self.rooms, should_light)  # TODO
 
-            ctx = VisualizationContext(self.grid, self.persons, self.light_dict, set(self.sensors), set(self.cameras),
-                                       self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
-                                       self.get_time(), self.sun_power, self.sun_position, self.sun_distance,
-                                       set(self.detection_points))
-            self.update_lights(ctx)
-            self.visualization_manager.redraw(ctx)
+            self.draw()
             t = time() - t
             if t < 0.1:
                 sleep(0.1 - t)
@@ -53,9 +49,15 @@ class SimulationManager:
     def get_time(self) -> str:
         return "22:22"  # TODO
 
+    def draw(self):
+        ctx = VisualizationContext(self.grid, self.persons, self.light_dict, set(self.sensors), set(self.cameras),
+                                   self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
+                                   self.get_time(), self.sun_power, self.sun_position, self.sun_distance,
+                                   set(self.detection_points))
+        self.update_lights(ctx)
+        self.visualization_manager.redraw(ctx)
+
     def update_lights(self, context):
         for x in range(len(context.grid[0])):
             for y in range(len(context.grid)):
                 context.grid[y][x].light_level = min(self.illuminance_calc.calculate(x, y, context), 255)
-                # context.grid[y][x].light_level = min(IlluminanceCalculator.calculate(x, y, context), 255)
-                # context.grid[y][x].light_level = min(random.randint(0, 255), 255)
