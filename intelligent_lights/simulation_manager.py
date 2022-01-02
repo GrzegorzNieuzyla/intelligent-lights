@@ -29,21 +29,27 @@ class SimulationManager:
 
     def run(self):
         sleep(0.5)
+        iteration_counter = 0
         while self.visualization_manager.running:
             t = time()
             self.person_simulator.process()  # TODO
             self.lights_adjuster.process()  # TODO
 
-            ctx = VisualizationContext(self.grid, self.getPersonsLocalizations(), self.lights, set(self.sensors), set(self.cameras),
+            ctx = VisualizationContext(self.grid, self.get_persons_localizations(), self.lights, set(self.sensors), set(self.cameras),
                                        self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
                                        self.get_time(), self.sun_power, self.sun_position, self.sun_distance)
-            self.update_lights(ctx)
-            self.visualization_manager.redraw(ctx)
-            t = time() - t
-            if t < 0.1:
-                sleep(0.1 - t)
 
-    def getPersonsLocalizations(self):
+            if iteration_counter == 0:
+                self.update_lights(ctx)
+            iteration_counter = (0 if iteration_counter >= 5 else (iteration_counter + 1))
+
+            self.visualization_manager.redraw(ctx)
+
+            t = time() - t
+            if t < 0.03:
+                sleep(0.03 - t)
+
+    def get_persons_localizations(self):
         localizations = {(0, 0)}
         localizations.clear()
         for person in self.persons:
