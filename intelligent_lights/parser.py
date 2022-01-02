@@ -39,7 +39,7 @@ class Parser:
             self.sun_power[label] = floor['sun_power']
             self.sun_position[label] = floor['sun_position']
             self.sun_distance[label] = floor['sun_distance']
-            self.detection_points[label] = floor["detection_points"]
+            self.detection_points[label] = {(dp[0], dp[1]) for dp in floor["detection_points"]}
 
             width, height = floor['width'], floor['height']
             self.cell_sizes[label] = floor['cell_size']

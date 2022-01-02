@@ -36,14 +36,14 @@ class SimulationManager:
         while self.visualization_manager.running:
             t = time()
             self.person_simulator.process()  # TODO
-            should_light = {l: random.random() > 0.5 for l in self.sensors}
-            detected = {(d[0], d[1]): random.random() > 0.5 for d in self.detection_points}
-            self.lights_adjuster.process(self.sensors, self.lights, self.sectors, self.rooms, should_light, detected)  # TODO
+            should_light = {d: random.random() > 0.5 for d in self.detection_points}
+            sensors = set((x, y, self.grid[y][x].light_level) for x, y in self.sensors)
+            self.lights_adjuster.process(sensors, self.lights, self.sectors, self.rooms, should_light)  # TODO
 
             ctx = VisualizationContext(self.grid, self.persons, self.light_dict, set(self.sensors), set(self.cameras),
                                        self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
                                        self.get_time(), self.sun_power, self.sun_position, self.sun_distance,
-                                       self.detection_points)
+                                       set(self.detection_points))
             self.update_lights(ctx)
             self.visualization_manager.redraw(ctx)
             t = time() - t
