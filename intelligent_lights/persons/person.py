@@ -2,7 +2,7 @@ import collections
 from random import randint
 
 from intelligent_lights.cells.cell_type import CellType
-from intelligent_lights.helpers.localization import Localization
+from intelligent_lights.persons.localization import Localization
 
 
 class Person:

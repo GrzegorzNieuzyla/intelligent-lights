@@ -1,7 +1,7 @@
 from random import randint
 from threading import Thread
 
-from intelligent_lights.helpers.person import Person
+from intelligent_lights.persons.person import Person
 from intelligent_lights.parser import Parser
 from intelligent_lights.simulation_manager import SimulationManager
 from intelligent_lights.visualization.visualization_manager import VisualizationManager
