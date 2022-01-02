@@ -27,17 +27,25 @@ class SimulationManager:
         self.person_simulator = PersonSimulator()
 
     def run(self):
-        sleep(0.5)
         while self.visualization_manager.running:
             self.person_simulator.process()  # TODO
             self.lights_adjuster.process()  # TODO
 
-            ctx = VisualizationContext(self.grid, self.persons, self.lights, set(self.sensors), set(self.cameras),
+            ctx = VisualizationContext(self.grid, self.getPersonsLocalizations(), self.lights, set(self.sensors), set(self.cameras),
                                        self.sectors, self.exits, self.rooms, self.windows, self.cell_size,
                                        self.get_time(), self.sun_power, self.sun_position, self.sun_distance)
             self.update_lights(ctx)
             self.visualization_manager.redraw(ctx)
             sleep(0.1)
+
+    def getPersonsLocalizations(self):
+        localizations = {(0,0)}
+        localizations.clear()
+        for person in self.persons:
+            localizations.add(person.position)
+            person.move(self.grid)
+
+        return localizations
 
     def get_time(self) -> str:
         return "22:22"  # TODO
