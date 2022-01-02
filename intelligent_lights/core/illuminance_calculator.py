@@ -2,6 +2,7 @@ from math import sqrt, floor
 
 from intelligent_lights.cells.cell_type import CellType
 from intelligent_lights.visualization.visualization_context import VisualizationContext
+from intelligent_lights.light import Light
 
 
 class IlluminanceCalculator:
@@ -18,7 +19,11 @@ class IlluminanceCalculator:
         # h = 200
         cell_size = context.cell_size_in_meter
         E = 0
-        for x_light, y_light in context.light_positions:
+        all_lights = context.light_positions
+        for p in context.sun_position:
+            all_lights[(p, -context.sun_distance)] = Light(p, -context.sun_distance, context.sun_power)
+
+        for x_light, y_light in all_lights:
             if IlluminanceCalculator.is_wall_in_straight_line(x, y, x_light, y_light, context):
                 continue
             dx = (x - x_light) * cell_size
@@ -28,9 +33,12 @@ class IlluminanceCalculator:
             r = sqrt(dx ** 2 + dy ** 2)
             if r == 0:
                 continue
-            I = context.light_positions[(x_light, y_light)].light_level * IlluminanceCalculator.power_multiplier
+            I = all_lights[(x_light, y_light)].light_level * IlluminanceCalculator.power_multiplier
             # cos_alfa = h / r
-            E += I / r ** 2
+            if x_light < 0 or y_light < 0:
+                E += I
+            else:
+                E += I / r ** 2
 
         return round(E)
 
@@ -62,7 +70,19 @@ class IlluminanceCalculator:
 
         for p in line:
             x, y = p
-            if context.grid[y][x].cell_type == CellType.Wall:
+            if x < 0 or y < 0:
+                continue
+            windows = []
+            for w in context.windows:
+                b = w.bounds
+                if b[0] == 0:
+                    for i in range(b[3]):
+                        windows.append((0, b[1] + i))
+                if b[1] == 0:
+                    for i in range(b[2]):
+                        windows.append((b[0] + i, 0))
+
+            if context.grid[y][x].cell_type == CellType.Wall and (x, y) not in windows:
                 return True
 
         return False
