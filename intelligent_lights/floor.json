@@ -144,7 +144,7 @@
       "windows": [
         [79, 0, 10, 1]
       ],
-      "sun_power": 500,
+      "sun_power": 10,
       "sun_position": [93, 94, 95],
       "sun_distance": 5,
       "detection_points": [
