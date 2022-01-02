@@ -27,6 +27,7 @@ class SimulationManager:
         self.person_simulator = PersonSimulator()
 
     def run(self):
+        sleep(0.5)
         while self.visualization_manager.running:
             self.person_simulator.process()  # TODO
             self.lights_adjuster.process()  # TODO
