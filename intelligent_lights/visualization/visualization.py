@@ -43,7 +43,7 @@ class Visualization:
 
     @staticmethod
     def get_light_value(cell) -> Tuple[int, int, int]:
-        val = cell.light_level
+        val = max(0, min(cell.light_level, 255))
         return val, val, 0
 
     def draw_text(self, text, x, y, color=TEXT_COLOR):

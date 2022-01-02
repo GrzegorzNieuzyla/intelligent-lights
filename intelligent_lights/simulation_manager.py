@@ -36,7 +36,7 @@ class SimulationManager:
         while self.visualization_manager.running:
             t = time()
             self.person_simulator.process(self.grid, self.cameras)
-            should_light = {d: random.random() > -0.5 for d in self.detection_points}
+            should_light = self.get_enabled_points()
             sensors = set((x, y, self.grid[y][x].light_level) for x, y in self.sensors)
             self.lights_adjuster.process(sensors, self.lights, self.sectors, self.rooms, should_light)  # TODO
 
@@ -56,6 +56,14 @@ class SimulationManager:
                                    self.sun_distance, set(self.detection_points))
         self.update_lights(ctx)
         self.visualization_manager.redraw(ctx)
+
+    def get_enabled_points(self):
+        persons, _ = self.person_simulator.get_persons_positions()
+        result = {}
+        for point in self.detection_points:
+            sector = self.lights_adjuster.find_sector_for_cell(*point, self.sectors)
+            result[point] = any(sector.is_cell_in(*pos) for pos in persons)
+        return result
 
     def update_lights(self, context):
         for x in range(len(context.grid[0])):

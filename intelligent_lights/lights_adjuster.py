@@ -18,18 +18,18 @@ class LightsAdjuster:
         self.turn_off_unnecessary_lights(lights, sectors, should_light)
 
         for detection_point, _ in filter(lambda x_: x_[1], should_light.items()):
-            room = self._find_room_for_cell(*detection_point, rooms)
-            sector = self._find_sector_for_cell(*detection_point, sectors)
-            if not room or not sector: continue
-            sensors_in_room = list(filter(lambda p: room.is_cell_in(p[0], p[1]), sensors))
+            # room = self.find_room_for_cell(*detection_point, rooms)
+            sector = self.find_sector_for_cell(*detection_point, sectors)
+            if not sector: continue
+            sensors_in_sector = list(filter(lambda p: sector.is_cell_in(p[0], p[1]), sensors))
             light_in_sector = list(filter(lambda p: sector.is_cell_in(p.x, p.y), lights))
-            for x, y, val in sensors_in_room:
+            for x, y, val in sensors_in_sector:
                 xd, yd = detection_point
                 if abs(xd-x) + abs(yd-y) <= 2:
                     sensors_to_adjust = [(x, y, val)]
                     break
             else:
-                sensors_to_adjust = sensors_in_room
+                sensors_to_adjust = sensors_in_sector
             value = self._calculate_light_value(*detection_point, sensors_to_adjust)
             if value < self.REQUIRED_LIGHT:
                 if detection_point in self.to_adjust:
@@ -52,14 +52,14 @@ class LightsAdjuster:
         for detection_point, _ in filter(lambda x: not x[1], should_light.items()):
             if detection_point in self.to_adjust:
                 del self.to_adjust[detection_point]
-            sector = self._find_sector_for_cell(*detection_point, sectors)
+            sector = self.find_sector_for_cell(*detection_point, sectors)
             if sector:
                 should_off = filter(lambda p: sector.is_cell_in(p.x, p.y), lights)
                 for light in should_off:
                     light.light_level = 0
 
     @staticmethod
-    def _find_sector_for_cell(x, y, sectors: List[Sector]):
+    def find_sector_for_cell(x, y, sectors: List[Sector]):
         for sector in sectors:
             if sector.is_cell_in(x, y):
                 return sector
@@ -67,7 +67,7 @@ class LightsAdjuster:
         return None
 
     @staticmethod
-    def _find_room_for_cell(x, y, rooms: List[Room]):
+    def find_room_for_cell(x, y, rooms: List[Room]):
         for room in rooms:
             if room.is_cell_in(x, y):
                 return room
