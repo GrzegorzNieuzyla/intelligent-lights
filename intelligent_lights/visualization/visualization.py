@@ -3,7 +3,6 @@ from typing import Tuple, List
 import pygame
 
 from intelligent_lights.cells.cell_type import CellType
-from intelligent_lights.core.illuminance_calculator import IlluminanceCalculator
 from intelligent_lights.display import Display
 from intelligent_lights.visualization.visualization_context import VisualizationContext
 

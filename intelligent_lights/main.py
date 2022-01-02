@@ -38,7 +38,7 @@ SAMPLE_PERSONS = [
 visualization = VisualizationManager(1600, 900, len(SAMPLE_GRID[0]), len(SAMPLE_GRID), force_redraw=True)
 
 for light in SAMPLE_LIGHTS:
-    light.light_level = randint(0, 100)
+    light.light_level = 0
     SAMPLE_GRID[light.y][light.x].light_level = light.light_level
 
 light_dict = {(light.x, light.y): light for light in SAMPLE_LIGHTS}

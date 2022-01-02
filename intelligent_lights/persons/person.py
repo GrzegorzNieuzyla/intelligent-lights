@@ -52,7 +52,7 @@ class Person:
         return (x, y)
 
     def move(self, grid):
-        if len(self.path) > 0:
+        if self.path and len(self.path) > 0:
             self.position = self.path[0]
             self.path = self.path[1:]
         else:

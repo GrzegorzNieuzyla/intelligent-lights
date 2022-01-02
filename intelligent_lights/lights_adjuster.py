@@ -7,7 +7,7 @@ from intelligent_lights.light import Light
 
 class LightsAdjuster:
     EPSILON = 5
-    REQUIRED_LIGHT = 150
+    REQUIRED_LIGHT = 100
 
     def __init__(self):
         self.to_adjust = {}
@@ -20,7 +20,7 @@ class LightsAdjuster:
         for detection_point, _ in filter(lambda x_: x_[1], should_light.items()):
             room = self._find_room_for_cell(*detection_point, rooms)
             sector = self._find_sector_for_cell(*detection_point, sectors)
-            if not room: continue
+            if not room or not sector: continue
             sensors_in_room = list(filter(lambda p: room.is_cell_in(p[0], p[1]), sensors))
             light_in_sector = list(filter(lambda p: sector.is_cell_in(p.x, p.y), lights))
             for x, y, val in sensors_in_room:
@@ -34,6 +34,9 @@ class LightsAdjuster:
             if value < self.REQUIRED_LIGHT:
                 if detection_point in self.to_adjust:
                     ratio = (value - self.to_adjust[detection_point]) / self.EPSILON
+                    if ratio == 0:
+                        del self.to_adjust[detection_point]
+                        return
                     req = (self.REQUIRED_LIGHT + self.EPSILON - value) / ratio
                     for light in light_in_sector:
                         light.light_level += req
