@@ -16,7 +16,6 @@ LIGHT_COLOR = (255, 255, 255)
 TEXT_COLOR = (255, 0, 0)
 CAMERA_COLOR = (128, 128, 128)
 SENSOR_COLOR = (255, 128, 0)
-SECTOR_COLOR = (255, 0, 0)
 EXIT_COLOR = (0, 255, 0)
 ROOM_COLOR = (176, 0, 176)
 WINDOW_COLOR = (0, 0, 255)
@@ -88,13 +87,6 @@ class Visualization:
         for grid_x, grid_y in context.light_positions:
             self.draw_text(str(int(context.light_positions[(grid_x, grid_y)].light_level)),
                            *self.get_center(*self.get_screen_position(grid_x, grid_y)))
-
-        for sector in context.sectors:
-            x, y, w, h = sector.bounds
-            x, y = self.get_screen_position(x, y)
-            w *= self.cell_width
-            h *= self.cell_height
-            pygame.draw.rect(self.screen, SECTOR_COLOR, pygame.Rect(x, y, w, h), width=2)
 
         for ex in context.exits:
             x, y, w, h = ex.bounds

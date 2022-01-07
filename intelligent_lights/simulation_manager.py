@@ -1,5 +1,4 @@
 from time import sleep, time
-import random
 
 from intelligent_lights.core.illuminance_calculator import IlluminanceCalculator
 from intelligent_lights.lights_adjuster import LightsAdjuster
@@ -9,12 +8,11 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 
 
 class SimulationManager:
-    def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, sectors, cell_size, exits, windows,
+    def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, cell_size, exits, windows,
                  persons, sun_power, sun_position, sun_distance, detection_points):
         self.windows = windows
         self.exits = exits
         self.cell_size = cell_size
-        self.sectors = sectors
         self.rooms = rooms
         self.cameras = cameras
         self.sensors = sensors
@@ -38,7 +36,7 @@ class SimulationManager:
             self.person_simulator.process(self.grid, self.cameras)
             should_light = self.get_enabled_points()
             sensors = set((x, y, self.grid[y][x].light_level) for x, y in self.sensors)
-            self.lights_adjuster.process(sensors, self.lights, self.sectors, self.rooms, should_light)  # TODO
+            self.lights_adjuster.process(sensors, self.lights, self.rooms, should_light)  # TODO
 
             self.draw()
             t = time() - t
@@ -51,7 +49,7 @@ class SimulationManager:
     def draw(self):
         persons_visible_positions, persons_not_visible_positions = self.person_simulator.get_persons_positions()
         ctx = VisualizationContext(self.grid, persons_visible_positions, persons_not_visible_positions, self.light_dict,
-                                   set(self.sensors), set(self.cameras), self.sectors, self.exits, self.rooms,
+                                   set(self.sensors), set(self.cameras), self.exits, self.rooms,
                                    self.windows, self.cell_size, self.get_time(), self.sun_power, self.sun_position,
                                    self.sun_distance, set(self.detection_points))
         self.update_lights(ctx)
@@ -61,7 +59,7 @@ class SimulationManager:
         persons, _ = self.person_simulator.get_persons_positions()
         result = {}
         for point in self.detection_points:
-            sector = self.lights_adjuster.find_sector_for_cell(*point, self.sectors)
+            sector = self.lights_adjuster.find_room_for_cell(*point, self.rooms)
             result[point] = any(sector.is_cell_in(*pos) for pos in persons)
         return result
 
