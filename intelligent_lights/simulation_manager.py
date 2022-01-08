@@ -8,6 +8,9 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 
 
 class SimulationManager:
+    TIME_STEP_IN_S = 0.5
+    MIN_FRAME_DELAY = 0.1
+
     def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, cell_size, exits, windows,
                  persons, sun_power, sun_position, sun_distance, detection_points):
         self.windows = windows
@@ -25,7 +28,7 @@ class SimulationManager:
         self.detection_points = detection_points
         self.visualization_manager: VisualizationManager = vis_manager
         self.lights_adjuster = LightsAdjuster(self.sensors, self.lights, self.rooms, self.detection_points,
-                                              self.cell_size)
+                                              self.cell_size, self.TIME_STEP_IN_S)
         self.person_simulator = PersonSimulator(persons)
         self.illuminance_calc = IlluminanceCalculator()
 
@@ -38,11 +41,10 @@ class SimulationManager:
             should_light = self.get_enabled_points()
             self.update_sensors()
             self.lights_adjuster.process(should_light)  # TODO
-
             self.update_environment_and_draw()
             t = time() - t
-            if t < 0.1:
-                sleep(0.1 - t)
+            if t < self.MIN_FRAME_DELAY:
+                sleep(self.MIN_FRAME_DELAY - t)
 
     def get_time(self) -> str:
         return "22:22"  # TODO

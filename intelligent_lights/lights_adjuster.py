@@ -9,22 +9,26 @@ class LightsAdjuster:
     EPSILON = 5
     REQUIRED_LIGHT = 100
     MAX_SENSOR_DISTANCE = 5
+    HYSTERESIS_TIME = 20
+    HYSTERESIS_DELAY = 10
 
     def __init__(self, sensors: Set[Sensor], lights: List[Light], rooms: List[Room],
-                 detection_points: List[Tuple[int, int]], cell_size: float):
+                 detection_points: List[Tuple[int, int]], cell_size: float, time_step):
         self.to_adjust = {}
         self.applicable_lights = {}
         self.applicable_sensors = {}
         self.lights_mapping = {}
         self.adjusted_lights = {}
+        self.lights_to_fade = {}
         self.sensors = sensors
         self.lights = lights
         self.rooms = rooms
         self.cell_size = cell_size
         self.detection_points = detection_points
         self.sensor_distance = self.MAX_SENSOR_DISTANCE / self.cell_size
+        self.time_step = time_step
         self.preprocess()
-        self._step = 0
+        self._time = 0
 
     def preprocess(self):
         for detection_point in self.detection_points:
@@ -35,12 +39,11 @@ class LightsAdjuster:
 
     def process(self, should_light: Dict[Tuple[int, int], bool]):
 
-        self.turn_off_unnecessary_lights(should_light)
-
         for detection_point in self.filter_detection_points(should_light):
             applicable_lights = self.find_applicable_lights(detection_point)
             sensors_to_adjust = self.find_applicable_sensors(detection_point)
             value = self._calculate_light_value(*detection_point, sensors=sensors_to_adjust)
+            self.lights_to_fade = {l: t for l, t in self.lights_to_fade.items() if l not in applicable_lights}
 
             if value < self.REQUIRED_LIGHT:
                 if detection_point in self.to_adjust:
@@ -70,7 +73,9 @@ class LightsAdjuster:
             elif detection_point in self.to_adjust:
                 del self.to_adjust[detection_point]
 
-        self._step += 1
+        self.turn_off_unnecessary_lights(should_light)
+        self.fade_out_lights()
+        self._time += self.time_step
 
     @staticmethod
     def filter_detection_points(should_light: Dict[Tuple[int, int], bool], on: bool = True) -> List[Tuple[int, int]]:
@@ -111,7 +116,19 @@ class LightsAdjuster:
 
         for light in self.lights:
             if all(not should_light[p] for p in self.lights_mapping[light]):
-                light.light_level = 0
+                if light not in self.lights_to_fade:
+                    self.lights_to_fade[light] = self._time + self.HYSTERESIS_DELAY
+
+    def fade_out_lights(self):
+        try:
+            val = Light.MAX_VALUE / (self.HYSTERESIS_TIME / self.time_step)
+        except ZeroDivisionError:
+            val = Light.MAX_VALUE
+
+        for light, t in self.lights_to_fade.items():
+            if self._time >= t:
+                light.light_level = max(0, light.light_level - val)
+        self.lights_to_fade = {l: v for l, v in self.lights_to_fade.items() if l.light_level > 0}
 
     def find_room_for_cell(self, x, y):
         for room in self.rooms:
