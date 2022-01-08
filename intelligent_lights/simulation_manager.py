@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from time import sleep, time
 
 from intelligent_lights.core.illuminance_calculator import IlluminanceCalculator
@@ -31,6 +32,7 @@ class SimulationManager:
                                               self.cell_size, self.TIME_STEP_IN_S)
         self.person_simulator = PersonSimulator(persons)
         self.illuminance_calc = IlluminanceCalculator()
+        self._time = datetime(2022, 2, 22, 10, 00)
 
     def run(self):
         sleep(0.5)
@@ -42,12 +44,14 @@ class SimulationManager:
             self.update_sensors()
             self.lights_adjuster.process(should_light)  # TODO
             self.update_environment_and_draw()
+            self._time += timedelta(seconds=self.TIME_STEP_IN_S)
+
             t = time() - t
             if t < self.MIN_FRAME_DELAY:
                 sleep(self.MIN_FRAME_DELAY - t)
 
     def get_time(self) -> str:
-        return "22:22"  # TODO
+        return f"{self._time.hour:02}:{self._time.minute:02}:{self._time.second:02}"
 
     def update_environment_and_draw(self):
         persons_visible_positions, persons_not_visible_positions = self.person_simulator.get_persons_positions()

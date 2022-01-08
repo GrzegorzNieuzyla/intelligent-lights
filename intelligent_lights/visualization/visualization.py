@@ -21,9 +21,10 @@ ROOM_COLOR = (176, 0, 176)
 WINDOW_COLOR = (0, 0, 255)
 DETECTION_POINT = (0, 128, 0)
 SENSOR_TEXT_COLOR = (255, 255, 255)
+TIME_COLOR = (255, 255, 255)
 
 SHOW_SENSORS_VALUES = False
-
+SHOW_TIME = True
 
 class Visualization:
     def __init__(self, display: Display, width: int, height: int, cell_width: int, cell_height: int):
@@ -115,6 +116,9 @@ class Visualization:
                 h *= self.cell_height
                 pygame.draw.rect(self.screen, ROOM_COLOR, pygame.Rect(x, y, w, h), width=2)
                 self.draw_text(room.label, x + w // 2, y + h // 2, ROOM_COLOR)
+
+        if SHOW_TIME:
+            self.draw_text(context.time, self.display.width // 2, self.cell_height / 2, TIME_COLOR)
 
         pygame.display.flip()
 
