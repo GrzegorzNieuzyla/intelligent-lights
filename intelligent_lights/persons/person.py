@@ -1,5 +1,5 @@
 import collections
-from random import randint
+from random import randint, choice
 from bresenham import bresenham
 
 from intelligent_lights.cells.cell_type import CellType
@@ -43,7 +43,7 @@ class Person:
         return self.getRandomLocalizationInRoom(rooms, 'Toilet')
 
     def getRandomLocalizationInRoom(self, rooms, label):
-        room = next((x for x in rooms if x.label == label), None)
+        room = choice(list(x for x in rooms if x.label.startswith(label)))
         roomRect = room.rects[randint(0, len(room.rects)-1)]
 
         x = randint(roomRect[0]+1, roomRect[0]+roomRect[2]-1)

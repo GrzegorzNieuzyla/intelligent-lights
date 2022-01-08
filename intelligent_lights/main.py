@@ -1,20 +1,18 @@
-from random import randint
 from threading import Thread
 
 from intelligent_lights.persons.person import Person
 from intelligent_lights.parser import Parser
+from intelligent_lights.sensors import Sensor
 from intelligent_lights.simulation_manager import SimulationManager
 from intelligent_lights.visualization.visualization_manager import VisualizationManager
-from intelligent_lights.visualization.visualization_context import VisualizationContext
 
 parser = Parser("floor.json")
 
 SAMPLE_GRID = parser.grids["Floor 1"]
 SAMPLE_LIGHTS = parser.lights["Floor 1"]
-SAMPLE_SENSORS = parser.sensors["Floor 1"]
+SAMPLE_SENSORS = set(map(lambda s: Sensor(*s), parser.sensors["Floor 1"]))
 SAMPLE_CAMERAS = parser.cameras["Floor 1"]
 SAMPLE_ROOMS = parser.rooms["Floor 1"]
-SAMPLE_SECTORS = parser.sectors["Floor 1"]
 CELL_SIZE = parser.cell_sizes["Floor 1"]
 SAMPLE_EXITS = parser.exits["Floor 1"]
 SAMPLE_WINDOWS = parser.windows["Floor 1"]
@@ -44,7 +42,7 @@ for light in SAMPLE_LIGHTS:
 light_dict = {(light.x, light.y): light for light in SAMPLE_LIGHTS}
 
 simulator = SimulationManager(visualization, SAMPLE_GRID, light_dict, SAMPLE_SENSORS, SAMPLE_CAMERAS, SAMPLE_ROOMS,
-                              SAMPLE_SECTORS, CELL_SIZE, SAMPLE_EXITS, SAMPLE_WINDOWS, SAMPLE_PERSONS, SAMPLE_SUN_POWER,
+                              CELL_SIZE, SAMPLE_EXITS, SAMPLE_WINDOWS, SAMPLE_PERSONS, SAMPLE_SUN_POWER,
                               SAMPLE_SUN_POSITION, SAMPLE_SUN_DISTANCE, SAMPLE_DETECTION_POINTS)
 
 sim_thread = Thread(target=simulator.run)

@@ -4,7 +4,6 @@ from typing import List, Tuple, Set, Dict
 from intelligent_lights.cells.cell import Cell
 from intelligent_lights.cells.exit import Exit
 from intelligent_lights.cells.room import Room
-from intelligent_lights.cells.sector import Sector
 from intelligent_lights.cells.window import Window
 from intelligent_lights.light import Light
 
@@ -17,7 +16,6 @@ class VisualizationContext:
     light_positions: Dict[Tuple[int, int], Light]
     sensor_positions: Set[Tuple[int, int]]
     camera_positions: Set[Tuple[int, int]]
-    sectors: List[Sector]
     exits: List[Exit]
     rooms: List[Room]
     windows: List[Window]

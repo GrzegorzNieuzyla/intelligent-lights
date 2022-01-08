@@ -4,7 +4,6 @@ from intelligent_lights.cells.device import Device
 from intelligent_lights.cells.empty import Empty
 from intelligent_lights.cells.exit import Exit
 from intelligent_lights.cells.room import Room
-from intelligent_lights.cells.sector import Sector
 from intelligent_lights.cells.wall import Wall
 from intelligent_lights.cells.window import Window
 from intelligent_lights.light import Light
@@ -57,6 +56,5 @@ class Parser:
                         grid[y0 + y][x0 + x] = Device() if (x0 + x, y0 + y) in self.devices[label] else Empty()
 
             self.rooms[label] = [Room(room, label) for room, label in zip(floor['rooms'], floor["room_labels"])]
-            self.sectors[label] = [Sector(sector) for sector in floor['sectors']]
 
             self.grids[label] = grid
