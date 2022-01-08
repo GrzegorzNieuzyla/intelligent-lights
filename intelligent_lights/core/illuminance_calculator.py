@@ -1,4 +1,4 @@
-from math import sqrt, floor
+from math import floor
 
 from intelligent_lights.cells.cell_type import CellType
 from intelligent_lights.visualization.visualization_context import VisualizationContext
@@ -6,7 +6,7 @@ from intelligent_lights.light import Light
 
 
 class IlluminanceCalculator:
-    power_multiplier = 5
+    power_multiplier = 20
 
     def __init__(self):
         self.cache = {}

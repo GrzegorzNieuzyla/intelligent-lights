@@ -1,17 +1,16 @@
-from random import randint
 from threading import Thread
 
 from intelligent_lights.persons.person import Person
 from intelligent_lights.parser import Parser
+from intelligent_lights.sensors import Sensor
 from intelligent_lights.simulation_manager import SimulationManager
 from intelligent_lights.visualization.visualization_manager import VisualizationManager
-from intelligent_lights.visualization.visualization_context import VisualizationContext
 
 parser = Parser("floor.json")
 
 SAMPLE_GRID = parser.grids["Floor 1"]
 SAMPLE_LIGHTS = parser.lights["Floor 1"]
-SAMPLE_SENSORS = parser.sensors["Floor 1"]
+SAMPLE_SENSORS = set(map(lambda s: Sensor(*s), parser.sensors["Floor 1"]))
 SAMPLE_CAMERAS = parser.cameras["Floor 1"]
 SAMPLE_ROOMS = parser.rooms["Floor 1"]
 CELL_SIZE = parser.cell_sizes["Floor 1"]

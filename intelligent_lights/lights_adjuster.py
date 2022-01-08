@@ -2,80 +2,139 @@ from typing import Set, List, Tuple, Dict
 
 from intelligent_lights.cells.room import Room
 from intelligent_lights.light import Light
+from intelligent_lights.sensors import Sensor
 
 
 class LightsAdjuster:
     EPSILON = 5
     REQUIRED_LIGHT = 100
+    MAX_SENSOR_DISTANCE = 5
 
-    def __init__(self):
+    def __init__(self, sensors: Set[Sensor], lights: List[Light], rooms: List[Room],
+                 detection_points: List[Tuple[int, int]], cell_size: float):
         self.to_adjust = {}
+        self.applicable_lights = {}
+        self.applicable_sensors = {}
+        self.lights_mapping = {}
+        self.adjusted_lights = {}
+        self.sensors = sensors
+        self.lights = lights
+        self.rooms = rooms
+        self.cell_size = cell_size
+        self.detection_points = detection_points
+        self.sensor_distance = self.MAX_SENSOR_DISTANCE / self.cell_size
+        self.preprocess()
+        self._step = 0
 
-    def process(self, sensors: Set[Tuple[int, int, int]], lights: List[Light], rooms: List[Room],
-                should_light: Dict[Tuple[int, int], bool]):
+    def preprocess(self):
+        for detection_point in self.detection_points:
+            self.applicable_lights[detection_point] = self.find_applicable_lights(detection_point)
+            self.applicable_sensors[detection_point] = self.find_applicable_sensors(detection_point)
+        for light in self.lights:
+            self.lights_mapping[light] = list(filter(lambda p: light in self.applicable_lights[p], self.detection_points))
 
-        self.turn_off_unnecessary_lights(lights, rooms, should_light)
+    def process(self, should_light: Dict[Tuple[int, int], bool]):
 
-        for detection_point, _ in filter(lambda x_: x_[1], should_light.items()):
-            # room = self.find_room_for_cell(*detection_point, rooms)
-            room = self.find_room_for_cell(*detection_point, rooms)
-            if not room: continue
-            sensors_in_room = list(filter(lambda p: room.is_cell_in(p[0], p[1]), sensors))
-            light_in_room = list(filter(lambda p: room.is_cell_in(p.x, p.y), lights))
-            for x, y, val in sensors_in_room:
-                xd, yd = detection_point
-                if abs(xd - x) + abs(yd - y) <= 2:
-                    sensors_to_adjust = [(x, y, val)]
-                    break
-            else:
-                sensors_to_adjust = sensors_in_room
-            value = self._calculate_light_value(*detection_point, sensors_to_adjust)
+        self.turn_off_unnecessary_lights(should_light)
+
+        for detection_point in self.filter_detection_points(should_light):
+            applicable_lights = self.find_applicable_lights(detection_point)
+            sensors_to_adjust = self.find_applicable_sensors(detection_point)
+            value = self._calculate_light_value(*detection_point, sensors=sensors_to_adjust)
+
             if value < self.REQUIRED_LIGHT:
                 if detection_point in self.to_adjust:
-                    ratio = (value - self.to_adjust[detection_point]) / self.EPSILON
+                    ratio = max(0, value - self.to_adjust[detection_point]) / self.EPSILON
                     if ratio == 0:
+                        # light is max value
                         del self.to_adjust[detection_point]
-                        return
+                        continue
                     req = (self.REQUIRED_LIGHT + self.EPSILON - value) / ratio
-                    for light in light_in_room:
-                        light.light_level += req
+                    if req <= 0:
+                        continue
+                    for light in applicable_lights:
+                        light.light_level = min(req + light.light_level, Light.MAX_VALUE)
                     del self.to_adjust[detection_point]
+                    del self.adjusted_lights[detection_point]
                 else:
-                    for light in light_in_room:
+                    lights = set()
+                    for light in applicable_lights:
+                        if any(light in light_set for light_set in self.adjusted_lights.values()):
+                            continue
                         light.light_level += self.EPSILON
-                    self.to_adjust[detection_point] = value
+                        lights.add(light)
+                    if lights:
+                        self.to_adjust[detection_point] = value
+                        self.adjusted_lights[detection_point] = lights
+
             elif detection_point in self.to_adjust:
                 del self.to_adjust[detection_point]
 
-    def turn_off_unnecessary_lights(self, lights, rooms, should_light):
-        for detection_point, _ in filter(lambda x: not x[1], should_light.items()):
-            if detection_point in self.to_adjust:
-                del self.to_adjust[detection_point]
-            room = self.find_room_for_cell(*detection_point, rooms)
-            if room:
-                should_off = filter(lambda p: room.is_cell_in(p.x, p.y), lights)
-                for light in should_off:
-                    light.light_level = 0
+        self._step += 1
 
     @staticmethod
-    def find_room_for_cell(x, y, rooms: List[Room]):
-        for room in rooms:
+    def filter_detection_points(should_light: Dict[Tuple[int, int], bool], on: bool = True) -> List[Tuple[int, int]]:
+        return list(map(lambda p: p[0], filter(lambda x_: on == x_[1], should_light.items())))
+
+    def find_applicable_lights(self, detection_point: Tuple[int, int]) -> List[Light]:
+        if detection_point in self.applicable_lights:
+            return self.applicable_lights[detection_point]
+        room = self.find_room_for_cell(*detection_point)
+        lights_in_room = list(filter(lambda p: room.is_cell_in(p.x, p.y), self.lights))
+        lights_with_dist = {l: self.dist(*detection_point, l.x, l.y) for l in lights_in_room}
+        min_dist = min(lights_with_dist.values())
+        dist_epsilon = 4
+        result = list(filter(lambda l: lights_with_dist[l] <= min_dist + dist_epsilon, lights_with_dist.keys()))
+        self.applicable_lights[detection_point] = result
+        return result
+
+    def find_applicable_sensors(self, detection_point: Tuple[int, int]) -> List[Sensor]:
+        if detection_point in self.applicable_sensors:
+            return self.applicable_sensors[detection_point]
+        room = self.find_room_for_cell(*detection_point)
+        sensors_in_room = list(filter(lambda p: room.is_cell_in(p.x, p.y), self.sensors))
+        for sensor in sensors_in_room:
+            xd, yd = detection_point
+            if abs(xd - sensor.x) + abs(yd - sensor.y) <= 3:
+                sensors_to_adjust = [sensor]
+                break
+        else:
+            sensors_to_adjust = list(
+                filter(lambda s: self.dist(s.x, s.y, *detection_point) <= self.sensor_distance, sensors_in_room))
+
+        self.applicable_sensors[detection_point] = sensors_to_adjust
+        return sensors_to_adjust
+
+    def turn_off_unnecessary_lights(self, should_light):
+        self.to_adjust = {k: v for k, v in self.to_adjust.items() if should_light[k]}
+        self.adjusted_lights = {k: v for k, v in self.adjusted_lights.items() if should_light[k]}
+
+        for light in self.lights:
+            if all(not should_light[p] for p in self.lights_mapping[light]):
+                light.light_level = 0
+
+    def find_room_for_cell(self, x, y):
+        for room in self.rooms:
             if room.is_cell_in(x, y):
                 return room
 
         return None
 
     @staticmethod
-    def _calculate_light_value(x, y, sensors):
+    def _calculate_light_value(x: int, y: int, sensors: List[Sensor]):
         if len(sensors) == 1:
-            return sensors[0][2]
+            return sensors[0].value
         dists = []
         for sensor in sensors:
-            dx = x - sensor[0]
-            dy = y - sensor[1]
-            dists.append([dx * dx + dy * dy, sensor[2]])
+            dx = x - sensor.x
+            dy = y - sensor.y
+            dists.append([dx * dx + dy * dy, sensor.value])
         total = sum(i[0] for i in dists)
         for dist in dists:
             dist[0] = 1 - dist[0] / total
         value = sum(x[0] * x[1] for x in dists)
         return value
+
+    @staticmethod
+    def dist(x1, y1, x2, y2) -> float:
+        return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5

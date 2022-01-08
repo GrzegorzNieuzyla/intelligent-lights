@@ -13,13 +13,16 @@ PERSON_RED_COLOR = (255, 0, 0)
 EMPTY_COLOR = (255, 255, 0)
 DEVICE_COLOR = (176, 0, 176)
 LIGHT_COLOR = (255, 255, 255)
-TEXT_COLOR = (255, 0, 0)
+LIGHT_TEXT_COLOR = (255, 0, 0)
 CAMERA_COLOR = (128, 128, 128)
 SENSOR_COLOR = (255, 128, 0)
 EXIT_COLOR = (0, 255, 0)
 ROOM_COLOR = (176, 0, 176)
 WINDOW_COLOR = (0, 0, 255)
 DETECTION_POINT = (0, 128, 0)
+SENSOR_TEXT_COLOR = (255, 255, 255)
+
+SHOW_SENSORS_VALUES = False
 
 
 class Visualization:
@@ -45,7 +48,7 @@ class Visualization:
         val = max(0, min(cell.light_level, 255))
         return val, val, 0
 
-    def draw_text(self, text, x, y, color=TEXT_COLOR):
+    def draw_text(self, text, x, y, color=LIGHT_TEXT_COLOR):
         surface = self.font.render(text, False, color)
         rect = surface.get_rect(center=(x, y))
         self.screen.blit(surface, rect)
@@ -88,6 +91,8 @@ class Visualization:
             self.draw_text(str(int(context.light_positions[(grid_x, grid_y)].light_level)),
                            *self.get_center(*self.get_screen_position(grid_x, grid_y)))
 
+        self.show_sensor_values(context)
+
         for ex in context.exits:
             x, y, w, h = ex.bounds
             x, y = self.get_screen_position(x, y)
@@ -112,3 +117,9 @@ class Visualization:
                 self.draw_text(room.label, x + w // 2, y + h // 2, ROOM_COLOR)
 
         pygame.display.flip()
+
+    def show_sensor_values(self, context):
+        if SHOW_SENSORS_VALUES:
+            for grid_x, grid_y in context.sensor_positions:
+                self.draw_text(str(int(context.grid[grid_y][grid_x].light_level)),
+                               *self.get_center(*self.get_screen_position(grid_x, grid_y)), SENSOR_TEXT_COLOR)
