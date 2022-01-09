@@ -1,4 +1,6 @@
 import collections
+import uuid
+from operator import attrgetter
 from random import randint, choice
 from bresenham import bresenham
 
@@ -8,14 +10,18 @@ from intelligent_lights.persons.localization import Localization
 
 class Person:
     def __init__(self, grid, rooms):
+        self.id = uuid.uuid1().int
+        self.previousPos = None
+        self.tempPreviousPos = None
         self.position = self.getRoom(rooms)
+        self.predicated_path = []
         self.localizations = [
             Localization(self.getRoom(rooms), 40),
             Localization(self.getRoom(rooms), 10),
             Localization(self.getKitchen(rooms), 5),
             Localization(self.getToilet(rooms), 3)
         ]
-        self.target = self.getTarget().position
+        self.target = max(self.localizations, key=attrgetter('severity')).position
         self.path = self.generatePath(grid)
         self.visible = False
 
@@ -24,7 +30,7 @@ class Person:
         for loc in self.localizations:
             count += loc.severity
 
-        return self.getLoc(randint(0, count-1))
+        return self.getLoc(randint(0, count - 1))
 
     def getLoc(self, rnd):
         for loc in self.localizations:
@@ -46,36 +52,27 @@ class Person:
         room = choice(list(x for x in rooms if x.label.startswith(label)))
         roomRect = room.rects[randint(0, len(room.rects)-1)]
 
-        x = randint(roomRect[0]+1, roomRect[0]+roomRect[2]-1)
-        y = randint(roomRect[1]+1, roomRect[1]+roomRect[3]-1)
+        x = randint(roomRect[0] + 1, roomRect[0] + roomRect[2] - 1)
+        y = randint(roomRect[1] + 1, roomRect[1] + roomRect[3] - 1)
 
         return (x, y)
 
     def move(self, grid):
+        self.tempPreviousPos = self.position
+        self.visible = False
         if self.path and len(self.path) > 0:
             self.position = self.path[0]
             self.path = self.path[1:]
         else:
-            targetLoc = self.getTarget()
+            if self.position == max(self.localizations, key=attrgetter('severity')).position:
+                targetLoc = self.getTarget()
+            else:
+                targetLoc = max(self.localizations, key=attrgetter('severity'))
+
             self.target = targetLoc.position
             self.path = self.generatePath(grid)
             for i in range(targetLoc.severity):
                 self.path.append(self.target)
-
-    def update_camera_visibility(self, grid, cameras):
-        self.visible = self.check_camera_visibility(grid, cameras)
-
-    def check_camera_visibility(self, grid, cameras):
-        for camera_x, camera_y in cameras:
-            visible = True
-            for check_x, check_y in list(bresenham(self.position[0], self.position[1], camera_x, camera_y)):
-                if grid[check_y][check_x].cell_type == CellType.Wall:
-                    visible = False
-                    break
-
-            if visible:
-                return True
-        return False
 
     def generatePath(self, grid):
         start = self.position
