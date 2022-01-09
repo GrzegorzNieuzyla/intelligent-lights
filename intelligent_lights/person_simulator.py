@@ -22,9 +22,6 @@ class PersonSimulator:
 
                 if len(prediction) >= 15:
                     predictions.append(prediction[14])
-
-                if len(prediction) >= 20:
-                    predictions.append(prediction[19])
             else:
                 not_visible.append(person.position)
 

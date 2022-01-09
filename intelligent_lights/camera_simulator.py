@@ -49,23 +49,14 @@ class CameraSimulator:
             i = 0
             id_prev = -1
             for cord in path:
-                if id_prev == -1 and cord[0]-3 <= prev[0] <= cord[0]+3 and cord[1]-3 <= prev[1] <= cord[1]+3:
+                if id_prev == -1 and cord[0]-5 <= prev[0] <= cord[0]+5 and cord[1]-5 <= prev[1] <= cord[1]+5:
                     id_prev = i
-                elif id_prev != -1 and cord[0]-3 <= current[0] <= cord[0]+3 and cord[1]-3 <= current[1] <= cord[1]+3:
+                elif id_prev != -1 and cord[0]-5 <= current[0] <= cord[0]+5 and cord[1]-5 <= current[1] <= cord[1]+5:
                     if path[i + 1:]:
                         found_paths.append(path[i + 1:])
                 i += 1
 
         if len(found_paths) == 0:
             return []
-        elif len(found_paths) == 1:
-            return found_paths[0]
 
-        count = 0
-        for i in range(len(min(found_paths, key=len))):
-            for j in range(len(found_paths) - 1):
-                if found_paths[j + 1][i][0]-3 <= found_paths[j][i][0] <= found_paths[j + 1][i][0]+3 and found_paths[j + 1][i][1]-3 <= found_paths[j][i][1] <= found_paths[j + 1][i][1]+3:
-                    break
-                count += 1
-
-        return found_paths[0][:count]
+        return found_paths[0]
