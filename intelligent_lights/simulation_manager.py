@@ -3,6 +3,7 @@ from time import sleep, time
 
 from intelligent_lights.core.illuminance_calculator import IlluminanceCalculator
 from intelligent_lights.lights_adjuster import LightsAdjuster
+from intelligent_lights.blinds_adjuster import BlindsAdjuster
 from intelligent_lights.person_simulator import PersonSimulator
 from intelligent_lights.visualization.visualization_context import VisualizationContext
 from intelligent_lights.visualization.visualization_manager import VisualizationManager
@@ -30,8 +31,9 @@ class SimulationManager:
         self.visualization_manager: VisualizationManager = vis_manager
         self.lights_adjuster = LightsAdjuster(self.sensors, self.lights, self.rooms, self.detection_points,
                                               self.cell_size, self.TIME_STEP_IN_S)
+        self.blinds_adjuster = BlindsAdjuster(self.detection_points, self.rooms, self.sensors, self.windows, self.grid, self.cell_size)
         self.person_simulator = PersonSimulator(persons)
-        self.illuminance_calc = IlluminanceCalculator()
+        self.illuminance_calc = IlluminanceCalculator(self.blinds_adjuster)
         self._time = datetime(2022, 2, 22, 10, 00)
 
     def run(self):
@@ -42,6 +44,7 @@ class SimulationManager:
             self.person_simulator.process(self.grid, self.cameras)
             should_light = self.get_enabled_points()
             self.update_sensors()
+            self.blinds_adjuster.process()
             self.lights_adjuster.process(should_light)  # TODO
             self.update_environment_and_draw()
             self._time += timedelta(seconds=self.TIME_STEP_IN_S)

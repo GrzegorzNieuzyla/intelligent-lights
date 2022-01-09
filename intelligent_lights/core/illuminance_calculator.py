@@ -8,8 +8,9 @@ from intelligent_lights.light import Light
 class IlluminanceCalculator:
     power_multiplier = 20
 
-    def __init__(self):
+    def __init__(self, blinds_adjuster):
         self.cache = {}
+        self.blinds_adjuster = blinds_adjuster
 
     '''
     E = I*cos(alfa)/r^2
@@ -35,7 +36,7 @@ class IlluminanceCalculator:
             I = all_lights[(x_light, y_light)].light_level * IlluminanceCalculator.power_multiplier
             # cos_alfa = h / r
             if x_light < 0 or y_light < 0:
-                E += I
+                E += I / IlluminanceCalculator.power_multiplier * self.blinds_adjuster.level
             else:
                 E += I / r
 
