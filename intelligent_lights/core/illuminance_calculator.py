@@ -1,3 +1,4 @@
+from copy import copy
 from math import floor
 
 from intelligent_lights.cells.cell_type import CellType
@@ -19,7 +20,7 @@ class IlluminanceCalculator:
         # h = 200
         cell_size = context.cell_size_in_meter
         E = 0
-        all_lights = context.light_positions
+        all_lights = copy(context.light_positions)
         for p in context.sun_position:
             all_lights[(p, -context.sun_distance)] = Light(p, -context.sun_distance, context.sun_power)
 
@@ -84,6 +85,9 @@ class IlluminanceCalculator:
                 if b[1] == 0:
                     for i in range(b[2]):
                         windows.append((b[0] + i, 0))
+
+            if x >= 100 or y >= 50:
+                continue
 
             if context.grid[y][x].cell_type == CellType.Wall and (x, y) not in windows:
                 result = True
