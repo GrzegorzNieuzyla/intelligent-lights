@@ -13,6 +13,7 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 class SimulationManager:
     TIME_STEP_IN_S = 0.5
     MIN_FRAME_DELAY = 0.1
+    REDRAW_INTERVAL = 1
 
     def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, cell_size, exits, windows,
                  persons, sun_power, sun_position, sun_distance, detection_points):
@@ -36,12 +37,15 @@ class SimulationManager:
         self.camera_simulator = CameraSimulator(cameras)
         self.illuminance_calc = IlluminanceCalculator(self.blinds_adjuster)
         self._time = datetime(2022, 2, 22, 10, 00)
+        self.step = 0
 
     def run(self):
         sleep(0.5)
         self.update_environment_and_draw()
+        t = 0
         while self.visualization_manager.running:
-            t = time()
+            if self.should_redraw():
+                t = time()
             self.person_simulator.process(self.grid)
             self.camera_simulator.process(self.grid, self.person_simulator.persons)
             should_light = self.get_enabled_points()
@@ -51,9 +55,11 @@ class SimulationManager:
             self.update_environment_and_draw()
             self._time += timedelta(seconds=self.TIME_STEP_IN_S)
 
-            t = time() - t
-            if t < self.MIN_FRAME_DELAY:
-                sleep(self.MIN_FRAME_DELAY - t)
+            self.step += 1
+            if self.should_redraw():
+                t = time() - t
+                if t < self.MIN_FRAME_DELAY:
+                    sleep(self.MIN_FRAME_DELAY - t)
 
     def get_time(self) -> str:
         return f"{self._time.hour:02}:{self._time.minute:02}:{self._time.second:02}"
@@ -65,7 +71,9 @@ class SimulationManager:
                                    self.rooms, self.windows, self.cell_size, self.get_time(), self.sun_power,
                                    self.sun_position, self.sun_distance, set(self.detection_points))
         self.update_lights(ctx)
-        self.visualization_manager.redraw(ctx)
+        if self.should_redraw():
+            self.visualization_manager.redraw(ctx)
+            print(time())
 
     def get_enabled_points(self):
         persons, _, predictions = self.person_simulator.get_persons_positions()
@@ -85,6 +93,11 @@ class SimulationManager:
         return result
 
     def update_lights(self, context):
+        if not self.should_redraw():
+            for x, y in context.sensor_positions:
+                context.grid[y][x].light_level = min(self.illuminance_calc.calculate(x, y, context), 255)
+            return
+
         for x in range(len(context.grid[0])):
             for y in range(len(context.grid)):
                 context.grid[y][x].light_level = min(self.illuminance_calc.calculate(x, y, context), 255)
@@ -92,3 +105,6 @@ class SimulationManager:
     def update_sensors(self):
         for sensor in self.sensors:
             sensor.value = self.grid[sensor.y][sensor.x].light_level
+
+    def should_redraw(self):
+        return self.step % self.REDRAW_INTERVAL == 0
