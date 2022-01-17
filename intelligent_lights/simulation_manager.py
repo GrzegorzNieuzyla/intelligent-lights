@@ -13,7 +13,7 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 class SimulationManager:
     TIME_STEP_IN_S = 0.5
     MIN_FRAME_DELAY = 0.1
-    REDRAW_INTERVAL = 1
+    REDRAW_INTERVAL = 120
 
     def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, cell_size, exits, windows,
                  persons, sun_power, sun_position, sun_distance, detection_points):
@@ -73,7 +73,6 @@ class SimulationManager:
         self.update_lights(ctx)
         if self.should_redraw():
             self.visualization_manager.redraw(ctx)
-            print(time())
 
     def get_enabled_points(self):
         persons, _, predictions = self.person_simulator.get_persons_positions()
