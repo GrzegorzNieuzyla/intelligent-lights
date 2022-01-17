@@ -6,6 +6,7 @@ from intelligent_lights.core.illuminance_calculator import IlluminanceCalculator
 from intelligent_lights.lights_adjuster import LightsAdjuster
 from intelligent_lights.blinds_adjuster import BlindsAdjuster
 from intelligent_lights.person_simulator import PersonSimulator
+from intelligent_lights.sun_simulator import SunSimulator
 from intelligent_lights.visualization.visualization_context import VisualizationContext
 from intelligent_lights.visualization.visualization_manager import VisualizationManager
 
@@ -33,6 +34,7 @@ class SimulationManager:
         self.lights_adjuster = LightsAdjuster(self.sensors, self.lights, self.rooms, self.detection_points,
                                               self.cell_size, self.TIME_STEP_IN_S)
         self.blinds_adjuster = BlindsAdjuster(self.detection_points, self.rooms, self.sensors, self.windows, self.grid, self.cell_size)
+        self.sun_simulator = SunSimulator(sun_power, sun_position)
         self.person_simulator = PersonSimulator(persons)
         self.camera_simulator = CameraSimulator(cameras)
         self.illuminance_calc = IlluminanceCalculator(self.blinds_adjuster)
@@ -44,8 +46,10 @@ class SimulationManager:
         self.update_environment_and_draw()
         t = 0
         while self.visualization_manager.running:
+            t = time()
             if self.should_redraw():
                 t = time()
+            self.update_sun()
             self.person_simulator.process(self.grid)
             self.camera_simulator.process(self.grid, self.person_simulator.persons)
             should_light = self.get_enabled_points()
@@ -107,3 +111,8 @@ class SimulationManager:
 
     def should_redraw(self):
         return self.step % self.REDRAW_INTERVAL == 0
+    
+    def update_sun(self):
+        self.sun_simulator.process()
+        self.sun_power = self.sun_simulator.sun_power
+        self.sun_position = self.sun_simulator.sun_position
