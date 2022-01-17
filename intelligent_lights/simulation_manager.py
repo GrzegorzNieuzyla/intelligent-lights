@@ -73,7 +73,6 @@ class SimulationManager:
         self.update_lights(ctx)
         if self.should_redraw():
             self.visualization_manager.redraw(ctx)
-            print(time())
 
     def get_enabled_points(self):
         persons, _, predictions = self.person_simulator.get_persons_positions()
