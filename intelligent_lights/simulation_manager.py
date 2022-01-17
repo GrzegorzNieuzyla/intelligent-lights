@@ -13,7 +13,7 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 class SimulationManager:
     TIME_STEP_IN_S = 0.5
     MIN_FRAME_DELAY = 0.1
-    REDRAW_INTERVAL = 120
+    REDRAW_INTERVAL = 1
 
     def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, cell_size, exits, windows,
                  persons, sun_power, sun_position, sun_distance, detection_points):
