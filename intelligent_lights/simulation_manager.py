@@ -59,7 +59,7 @@ class SimulationManager:
             should_light = self.get_enabled_points()
             self.update_sensors()
             self.blinds_adjuster.process()
-            self.lights_adjuster.process(should_light)  # TODO
+            self.lights_adjuster.process(should_light)
             self.update_environment_and_draw()
             self._time += timedelta(seconds=self.TIME_STEP_IN_S)
 

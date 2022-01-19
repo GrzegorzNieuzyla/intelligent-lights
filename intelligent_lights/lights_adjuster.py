@@ -50,7 +50,11 @@ class LightsAdjuster:
                     ratio = max(0, value - self.to_adjust[detection_point]) / self.EPSILON
                     if ratio == 0:
                         # light is max value
-                        del self.to_adjust[detection_point]
+                        prev = len(self.applicable_lights[detection_point])
+                        self.applicable_lights[detection_point] = self.find_applicable_lights(detection_point, search_again=True)
+                        if prev == len(self.applicable_lights[detection_point]):
+                            # no more lights to control
+                            del self.to_adjust[detection_point]
                         continue
                     req = (self.REQUIRED_LIGHT + self.EPSILON - value) / ratio
                     if req <= 0:
@@ -81,16 +85,23 @@ class LightsAdjuster:
     def filter_detection_points(should_light: Dict[Tuple[int, int], bool], on: bool = True) -> List[Tuple[int, int]]:
         return list(map(lambda p: p[0], filter(lambda x_: on == x_[1], should_light.items())))
 
-    def find_applicable_lights(self, detection_point: Tuple[int, int]) -> List[Light]:
-        if detection_point in self.applicable_lights:
+    def find_applicable_lights(self, detection_point: Tuple[int, int], search_again=False) -> List[Light]:
+        if detection_point in self.applicable_lights and not search_again:
             return self.applicable_lights[detection_point]
-        room = self.find_room_for_cell(*detection_point)
-        lights_in_room = list(filter(lambda p: room.is_cell_in(p.x, p.y), self.lights))
-        lights_with_dist = {l: self.dist(*detection_point, l.x, l.y) for l in lights_in_room}
-        min_dist = min(lights_with_dist.values())
+
         dist_epsilon = 4
-        result = list(filter(lambda l: lights_with_dist[l] <= min_dist + dist_epsilon, lights_with_dist.keys()))
-        self.applicable_lights[detection_point] = result
+        while True:
+            room = self.find_room_for_cell(*detection_point)
+            lights_in_room = list(filter(lambda p: room.is_cell_in(p.x, p.y), self.lights))
+            lights_with_dist = {l: self.dist(*detection_point, l.x, l.y) for l in lights_in_room}
+            min_dist = min(lights_with_dist.values())
+            result = list(filter(lambda l: lights_with_dist[l] <= min_dist + dist_epsilon, lights_with_dist.keys()))
+            self.applicable_lights[detection_point] = result
+            if not search_again or len(self.applicable_lights[detection_point]) == len(lights_in_room) or len(
+                    self.applicable_lights) < len(result):
+                break
+            dist_epsilon += 4
+
         return result
 
     def find_applicable_sensors(self, detection_point: Tuple[int, int]) -> List[Sensor]:

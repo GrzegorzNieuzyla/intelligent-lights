@@ -9,19 +9,19 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 
 def main(filename):
     parser = Parser(filename)
-
-    SAMPLE_GRID = parser.grids["Floor 1"]
-    SAMPLE_LIGHTS = parser.lights["Floor 1"]
-    SAMPLE_SENSORS = set(map(lambda s: Sensor(*s), parser.sensors["Floor 1"]))
-    SAMPLE_CAMERAS = parser.cameras["Floor 1"]
-    SAMPLE_ROOMS = parser.rooms["Floor 1"]
-    CELL_SIZE = parser.cell_sizes["Floor 1"]
-    SAMPLE_EXITS = parser.exits["Floor 1"]
-    SAMPLE_WINDOWS = parser.windows["Floor 1"]
-    SAMPLE_SUN_POWER = parser.sun_power["Floor 1"]
-    SAMPLE_SUN_POSITION = parser.sun_position["Floor 1"]
-    SAMPLE_SUN_DISTANCE = parser.sun_distance["Floor 1"]
-    SAMPLE_DETECTION_POINTS = parser.detection_points["Floor 1"]
+    floor = list(parser.grids.keys())[0]
+    SAMPLE_GRID = parser.grids[floor]
+    SAMPLE_LIGHTS = parser.lights[floor]
+    SAMPLE_SENSORS = set(map(lambda s: Sensor(*s), parser.sensors[floor]))
+    SAMPLE_CAMERAS = parser.cameras[floor]
+    SAMPLE_ROOMS = parser.rooms[floor]
+    CELL_SIZE = parser.cell_sizes[floor]
+    SAMPLE_EXITS = parser.exits[floor]
+    SAMPLE_WINDOWS = parser.windows[floor]
+    SAMPLE_SUN_POWER = parser.sun_power[floor]
+    SAMPLE_SUN_POSITION = parser.sun_position[floor]
+    SAMPLE_SUN_DISTANCE = parser.sun_distance[floor]
+    SAMPLE_DETECTION_POINTS = parser.detection_points[floor]
     SAMPLE_PERSONS = [
         Person(SAMPLE_GRID, SAMPLE_ROOMS),
         Person(SAMPLE_GRID, SAMPLE_ROOMS),
