@@ -14,7 +14,6 @@ from intelligent_lights.visualization.visualization_manager import Visualization
 class SimulationManager:
     TIME_STEP_IN_S = 0.5
     MIN_FRAME_DELAY = 0.1
-    REDRAW_INTERVAL = 1
 
     def __init__(self, vis_manager, grid, light_dict, sensors, cameras, rooms, cell_size, exits, windows,
                  persons, sun_power, sun_position, sun_distance, detection_points):
@@ -40,6 +39,9 @@ class SimulationManager:
         self.illuminance_calc = IlluminanceCalculator(self.blinds_adjuster)
         self._time = datetime(2022, 2, 22, 10, 00)
         self.step = 0
+        self.redraw_interval = 1
+        self.current_speed = 0
+        self.speeds = [1, 2, 5, 10, 20, 60, 120, 240]
 
     def run(self):
         sleep(0.5)
@@ -49,6 +51,8 @@ class SimulationManager:
             t = time()
             if self.should_redraw():
                 t = time()
+
+            self.update_speed()
             self.update_sun()
             self.person_simulator.process(self.grid)
             self.camera_simulator.process(self.grid, self.person_simulator.persons)
@@ -73,10 +77,13 @@ class SimulationManager:
         ctx = VisualizationContext(self.grid, persons_visible_positions, persons_not_visible_positions, self.light_dict,
                                    set(map(lambda s: (s.x, s.y), self.sensors)), set(self.camera_simulator.cameras), self.exits,
                                    self.rooms, self.windows, self.cell_size, self.get_time(), self.sun_power,
-                                   self.sun_position, self.sun_distance, set(self.detection_points))
+                                   self.sun_position, self.sun_distance, set(self.detection_points), self.get_secs_per_frame())
         self.update_lights(ctx)
         if self.should_redraw():
             self.visualization_manager.redraw(ctx)
+
+    def get_secs_per_frame(self):
+        return f"{self.redraw_interval * self.TIME_STEP_IN_S} sec/frame"
 
     def get_enabled_points(self):
         persons, _, predictions = self.person_simulator.get_persons_positions()
@@ -109,10 +116,18 @@ class SimulationManager:
         for sensor in self.sensors:
             sensor.value = self.grid[sensor.y][sensor.x].light_level
 
+    def update_speed(self):
+        if self.visualization_manager.should_speed_down():
+            self.current_speed = max(0, self.current_speed - 1)
+        if self.visualization_manager.should_speed_up():
+            self.current_speed = min(len(self.speeds) - 1, self.current_speed + 1)
+        self.redraw_interval = self.speeds[self.current_speed]
+
     def should_redraw(self):
-        return self.step % self.REDRAW_INTERVAL == 0
+        return self.step % self.redraw_interval == 0
     
     def update_sun(self):
         self.sun_simulator.process()
         self.sun_power = self.sun_simulator.sun_power
         self.sun_position = self.sun_simulator.sun_position
+

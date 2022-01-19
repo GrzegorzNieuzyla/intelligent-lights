@@ -6,7 +6,7 @@ from intelligent_lights.cells.cell_type import CellType
 from intelligent_lights.display import Display
 from intelligent_lights.visualization.visualization_context import VisualizationContext
 
-BACKGROUND_COLOR = (255, 255, 255)
+BACKGROUND_COLOR = (22, 22, 22)
 WALL_COLOR = (0, 0, 96)
 PERSON_BLUE_COLOR = (0, 0, 255)
 PERSON_RED_COLOR = (255, 0, 0)
@@ -22,19 +22,25 @@ WINDOW_COLOR = (0, 0, 255)
 DETECTION_POINT = (0, 128, 0)
 SENSOR_TEXT_COLOR = (255, 255, 255)
 TIME_COLOR = (255, 255, 255)
+BUTTON_COLOR = (255, 255, 255)
+BUTTON_TEXT_COLOR = (0, 0, 0)
 
 SHOW_SENSORS_VALUES = False
 SHOW_TIME = True
 
+
 class Visualization:
-    def __init__(self, display: Display, width: int, height: int, cell_width: int, cell_height: int):
+    def __init__(self, display: Display, width: int, height: int, cell_width: int, cell_height: int, status_height):
         self.display: Display = display
         self.cell_width = cell_width
         self.cell_height = cell_height
         self.width = width
         self.height = height
         self.screen = self.display.window
+        self.status_height = status_height
         self.font = pygame.font.SysFont("monospace", int(self.cell_height / 1.5), bold=True)
+        self.speed_down_button = pygame.Rect(display.width // 2 + 2 * status_height, display.height - status_height, status_height, status_height)
+        self.speed_up_button = pygame.Rect(display.width // 2 + 3 * status_height + 2, display.height - status_height, status_height, status_height)
 
     def get_cells(self) -> List[Tuple[int, int, int, int]]:
         for x in range(self.width):
@@ -118,9 +124,20 @@ class Visualization:
                 self.draw_text(room.label, x + w // 2, y + h // 2, ROOM_COLOR)
 
         if SHOW_TIME:
-            self.draw_text(context.time, self.display.width // 2, self.cell_height / 2, TIME_COLOR)
+            self.draw_time(context)
+            self.draw_buttons(context)
 
         pygame.display.flip()
+
+    def draw_time(self, context):
+        self.draw_text(context.time, self.display.width // 2, self.display.height - self.status_height // 2, TIME_COLOR)
+
+    def draw_buttons(self, context):
+        pygame.draw.rect(self.screen, BUTTON_COLOR, self.speed_down_button)
+        self.draw_text("<<", *self.speed_down_button.center, BUTTON_TEXT_COLOR)
+        pygame.draw.rect(self.screen, BUTTON_COLOR, self.speed_up_button)
+        self.draw_text(">>", *self.speed_up_button.center, BUTTON_TEXT_COLOR)
+        self.draw_text(context.secs_per_frame, self.speed_up_button.centerx + 3 * self.status_height, self.speed_up_button.centery, BUTTON_COLOR)
 
     def show_sensor_values(self, context):
         if SHOW_SENSORS_VALUES:
