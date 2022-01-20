@@ -77,7 +77,7 @@ class Visualization:
             elif cell.cell_type == CellType.Empty:
                 if self.surface == 'HISTORY':
                     value = context.history[grid_x][grid_y]
-                    color = (min(value, 255), max(255-value, 0), 0)
+                    color = (max(255-value, 0), max(255-value, 0), max(255-value, 0))
                 else:
                     color = self.get_light_value(context.grid[grid_y][grid_x])
             elif cell.cell_type == CellType.Device:
