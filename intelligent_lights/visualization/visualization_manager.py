@@ -64,6 +64,10 @@ class VisualizationManager:
                         self.button_status[0] = True
                     if self.visualization.speed_up_button.collidepoint(x, y):
                         self.button_status[1] = True
+                    if self.visualization.movement_button.collidepoint(x, y):
+                        self.visualization.surface = "MOVEMENT"
+                    if self.visualization.history_button.collidepoint(x, y):
+                        self.visualization.surface = "HISTORY"
             redraw_context = None
             with self.draw_mutex:
                 if self.context is not None and (self.context_modified or self.force_redraw):

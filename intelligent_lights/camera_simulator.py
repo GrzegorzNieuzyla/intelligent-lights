@@ -10,7 +10,6 @@ class CameraSimulator:
 
     def process(self, grid, persons):
         for person in persons:
-            person.move(grid)
             person.visible = self.check_camera_visibility(grid, person)
             person.previousPos = (person.tempPreviousPos if person.visible is True else person.previousPos)
             self.add_position_to_paths(person.id, person.previousPos, person.position)

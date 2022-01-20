@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from time import sleep, time
 
 from intelligent_lights.camera_simulator import CameraSimulator
+from intelligent_lights.history_manager import HistoryManager
 from intelligent_lights.core.illuminance_calculator import IlluminanceCalculator
 from intelligent_lights.lights_adjuster import LightsAdjuster
 from intelligent_lights.blinds_adjuster import BlindsAdjuster
@@ -42,6 +43,7 @@ class SimulationManager:
         self.redraw_interval = 1
         self.current_speed = 0
         self.speeds = [1, 2, 5, 10, 20, 60, 120, 240]
+        self.history_manager = HistoryManager()
 
     def run(self):
         sleep(0.5)
@@ -56,6 +58,7 @@ class SimulationManager:
             self.update_sun()
             self.person_simulator.process(self.grid)
             self.camera_simulator.process(self.grid, self.person_simulator.persons)
+            self.history_manager.update(self.person_simulator.get_visible_persons())
             should_light = self.get_enabled_points()
             self.update_sensors()
             self.blinds_adjuster.process()
@@ -77,7 +80,7 @@ class SimulationManager:
         ctx = VisualizationContext(self.grid, persons_visible_positions, persons_not_visible_positions, self.light_dict,
                                    set(map(lambda s: (s.x, s.y), self.sensors)), set(self.camera_simulator.cameras), self.exits,
                                    self.rooms, self.windows, self.cell_size, self.get_time(), self.sun_power,
-                                   self.sun_position, self.sun_distance, set(self.detection_points), self.get_secs_per_frame())
+                                   self.sun_position, self.sun_distance, set(self.detection_points), self.get_secs_per_frame(), self.history_manager.grid)
         self.update_lights(ctx)
         if self.should_redraw():
             self.visualization_manager.redraw(ctx)

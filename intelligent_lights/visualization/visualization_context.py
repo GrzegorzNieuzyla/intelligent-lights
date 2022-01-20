@@ -26,3 +26,4 @@ class VisualizationContext:
     sun_distance: int
     detection_points: Set[Tuple[int, int]]
     secs_per_frame: str
+    history: List[List[int]]

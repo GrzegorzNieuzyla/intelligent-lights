@@ -39,8 +39,11 @@ class Visualization:
         self.screen = self.display.window
         self.status_height = status_height
         self.font = pygame.font.SysFont("monospace", int(self.cell_height / 1.5), bold=True)
+        self.movement_button = pygame.Rect(display.width - 6 * status_height, display.height - status_height, 2.5 * status_height, status_height)
+        self.history_button = pygame.Rect(display.width - 3 * status_height, display.height - status_height, 2.5 * status_height, status_height)
         self.speed_down_button = pygame.Rect(display.width // 2 + 2 * status_height, display.height - status_height, status_height, status_height)
         self.speed_up_button = pygame.Rect(display.width // 2 + 3 * status_height + 2, display.height - status_height, status_height, status_height)
+        self.surface = 'MOVEMENT'
 
     def get_cells(self) -> List[Tuple[int, int, int, int]]:
         for x in range(self.width):
@@ -72,11 +75,16 @@ class Visualization:
             if cell.cell_type == CellType.Wall:
                 color = WALL_COLOR
             elif cell.cell_type == CellType.Empty:
-                color = self.get_light_value(context.grid[grid_y][grid_x])
+                if self.surface == 'HISTORY':
+                    value = context.history[grid_x][grid_y]
+                    color = (min(value, 255), max(255-value, 0), 0)
+                else:
+                    color = self.get_light_value(context.grid[grid_y][grid_x])
             elif cell.cell_type == CellType.Device:
                 color = DEVICE_COLOR
-            if (grid_x, grid_y) in context.light_positions:
-                color = LIGHT_COLOR
+            if self.surface == 'MOVEMENT':
+                if (grid_x, grid_y) in context.light_positions:
+                    color = LIGHT_COLOR
             pygame.draw.rect(self.screen, color, pygame.Rect(x, y, self.cell_width, self.cell_height))
             if (grid_x, grid_y) in context.person_visible_positions:
                 pygame.draw.circle(self.screen, PERSON_BLUE_COLOR, self.get_center(x, y),
@@ -84,19 +92,21 @@ class Visualization:
             if (grid_x, grid_y) in context.person_not_visible_positions:
                 pygame.draw.circle(self.screen, PERSON_RED_COLOR, self.get_center(x, y),
                                    min(self.cell_width, self.cell_height) // 2)
-            if (grid_x, grid_y) in context.camera_positions:
-                pygame.draw.circle(self.screen, CAMERA_COLOR, self.get_center(x, y),
-                                   min(self.cell_width, self.cell_height) // 2)
-            if (grid_x, grid_y) in context.sensor_positions:
-                pygame.draw.circle(self.screen, SENSOR_COLOR, self.get_center(x, y),
-                                   min(self.cell_width, self.cell_height) // 2)
-            if (grid_x, grid_y) in context.detection_points:
-                pygame.draw.circle(self.screen, DETECTION_POINT, self.get_center(x, y),
-                                   min(self.cell_width, self.cell_height) // 2)
+            if self.surface == 'MOVEMENT':
+                if (grid_x, grid_y) in context.camera_positions:
+                    pygame.draw.circle(self.screen, CAMERA_COLOR, self.get_center(x, y),
+                                       min(self.cell_width, self.cell_height) // 2)
+                if (grid_x, grid_y) in context.sensor_positions:
+                    pygame.draw.circle(self.screen, SENSOR_COLOR, self.get_center(x, y),
+                                       min(self.cell_width, self.cell_height) // 2)
+                if (grid_x, grid_y) in context.detection_points:
+                    pygame.draw.circle(self.screen, DETECTION_POINT, self.get_center(x, y),
+                                       min(self.cell_width, self.cell_height) // 2)
 
-        for grid_x, grid_y in context.light_positions:
-            self.draw_text(str(int(context.light_positions[(grid_x, grid_y)].light_level)),
-                           *self.get_center(*self.get_screen_position(grid_x, grid_y)))
+        if self.surface == 'MOVEMENT':
+            for grid_x, grid_y in context.light_positions:
+                self.draw_text(str(int(context.light_positions[(grid_x, grid_y)].light_level)),
+                               *self.get_center(*self.get_screen_position(grid_x, grid_y)))
 
         self.show_sensor_values(context)
 
@@ -133,6 +143,10 @@ class Visualization:
         self.draw_text(context.time, self.display.width // 2, self.display.height - self.status_height // 2, TIME_COLOR)
 
     def draw_buttons(self, context):
+        pygame.draw.rect(self.screen, BUTTON_COLOR, self.movement_button)
+        self.draw_text("MOVEMENT", *self.movement_button.center, BUTTON_TEXT_COLOR)
+        pygame.draw.rect(self.screen, BUTTON_COLOR, self.history_button)
+        self.draw_text("HISTORY", *self.history_button.center, BUTTON_TEXT_COLOR)
         pygame.draw.rect(self.screen, BUTTON_COLOR, self.speed_down_button)
         self.draw_text("<<", *self.speed_down_button.center, BUTTON_TEXT_COLOR)
         pygame.draw.rect(self.screen, BUTTON_COLOR, self.speed_up_button)

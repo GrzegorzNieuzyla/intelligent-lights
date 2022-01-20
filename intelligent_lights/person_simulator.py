@@ -26,3 +26,11 @@ class PersonSimulator:
                 not_visible.append(person.position)
 
         return set(visible), set(not_visible), set(predictions)
+
+    def get_visible_persons(self):
+        visible = []
+        for person in self.persons:
+            if person.visible:
+                visible.append(person.position)
+
+        return visible
