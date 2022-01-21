@@ -38,7 +38,7 @@ class SimulationManager:
         self.person_simulator = PersonSimulator(persons)
         self.camera_simulator = CameraSimulator(cameras)
         self.illuminance_calc = IlluminanceCalculator(self.blinds_adjuster)
-        self._time = datetime(2022, 2, 22, 10, 00)
+        self._time = datetime(2022, 2, 22, 7, 00)
         self.step = 0
         self.redraw_interval = 1
         self.current_speed = 0

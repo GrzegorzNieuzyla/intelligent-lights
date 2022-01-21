@@ -2,12 +2,12 @@ from typing import List
 
 
 class SunSimulator:
-    STEPS_CHANGE = 2
+    STEPS_CHANGE = 600
     NOON_POWER = 80
     SUN_POWER_CHANGE = 2
-    FULL_CYCLE = 150
+    FULL_CYCLE = 90000
     START_SUN_POWER = 20
-    START_POSITION = [60, 61, 62]
+    START_POSITION = [40, 41, 42]
 
     def __init__(self, sun_power: int, sun_position: List[int]):
         self.sun_power = sun_power

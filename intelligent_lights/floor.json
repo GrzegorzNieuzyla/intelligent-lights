@@ -127,7 +127,7 @@
         [79, 0, 10, 1]
       ],
       "sun_power": 20,
-      "sun_position": [60, 61, 62],
+      "sun_position": [40, 41, 42],
       "sun_distance": 5,
       "detection_points": [
         [8, 2],
